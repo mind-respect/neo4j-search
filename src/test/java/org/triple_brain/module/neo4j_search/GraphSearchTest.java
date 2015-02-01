@@ -62,7 +62,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
                 is("A description")
         );
     }
-/*
+
     @Test
     public void can_search_for_other_users_public_vertices() {
         indexGraph();
@@ -79,7 +79,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         );
         assertFalse(vertices.isEmpty());
     }
-
+/*
     @Test
     public void searching_for_own_vertices_only_does_not_return_vertices_of_other_users() {
         vertexA.makePublic();
