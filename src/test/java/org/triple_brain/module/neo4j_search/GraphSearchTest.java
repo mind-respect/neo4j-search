@@ -80,7 +80,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         assertFalse(vertices.isEmpty());
     }
 
-/*
+
     @Test
     public void searching_for_own_vertices_only_does_not_return_vertices_of_other_users() {
         vertexA.makePublic();
@@ -96,6 +96,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         );
         assertFalse(vertices.size() > 0);
     }
+    /*
     @Test
     public void searching_for_own_vertices_does_not_return_schemas() {
         SchemaOperator schema = createSchema(user);
