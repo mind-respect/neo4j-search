@@ -154,6 +154,26 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
+    public void search_goes_beyond_two_first_words() {
+        vertexA.label(
+                "bonjour monsieur proute"
+        );
+        vertexB.label(
+                "bonjour monsieur pratte"
+        );
+        vertexC.label(
+                "bonjour monsieur avion"
+        );
+        indexGraph();
+
+        List<VertexSearchResult> vertices = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+                "bonjour monsieur pr",
+                user
+        );
+        assertThat(vertices.size(), is(2));
+    }
+
+    @Test
     public void can_search_relations() {
         indexGraph();
         List<GraphElementSearchResult> results = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
@@ -215,28 +235,6 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
                 vertex.label(),
                 is(vertexA.label())
         );
-    }
-
-    @Test
-    @Ignore
-    //todo
-    public void search_goes_beyond_two_first_words() {
-        vertexA.label(
-                "bonjour monsieur proute"
-        );
-        vertexB.label(
-                "bonjour monsieur pratte"
-        );
-        vertexC.label(
-                "bonjour monsieur avion"
-        );
-        indexGraph();
-
-        List<VertexSearchResult> vertices = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
-                "bonjour monsieur pr",
-                user
-        );
-        assertThat(vertices.size(), is(2));
     }
 
     @Test

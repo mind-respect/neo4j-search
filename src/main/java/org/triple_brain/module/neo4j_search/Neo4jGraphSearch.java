@@ -17,7 +17,9 @@ import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.edge.Neo4jEdgeOperator;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceQueryBuilder;
+import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.EdgeFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
+import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.Neo4jSubGraphExtractor;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.schema.Neo4jSchemaOperator;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.vertex.Neo4jVertexInSubGraphOperator;
 import org.triple_brain.module.search.EdgeSearchResult;
@@ -125,9 +127,9 @@ public class Neo4jGraphSearch implements GraphSearch {
                 case Neo4jEdgeOperator.NEO4J_LABEL_NAME:
                     return (ResultType) buildEdgeSearchResult(row);
                 case Neo4jSchemaOperator.NEO4J_LABEL_NAME:
-                    return (ResultType) buildVertexSearchResult(row);
+                    return (ResultType) buildSchemaSearchResult(row);
             }
-            throw new RuntimeException("result type does not exist " + resultType);
+            throw new RuntimeException("result type " + resultType + " does not exist");
         }
 
         private String nodeTypeInRow(Map<String, Object> row){
@@ -149,11 +151,7 @@ public class Neo4jGraphSearch implements GraphSearch {
 
         private EdgeSearchResult buildEdgeSearchResult(Map<String, Object> row){
             return new EdgeSearchResult(
-                    new EdgePojo(
-                            GraphElementFromExtractorQueryRow.usingRowAndKey(row, "node").build(),
-                            null,
-                            null
-                    )
+                    (EdgePojo) EdgeFromExtractorQueryRow.usingRowAndKey(row, "node").build()
             );
         }
 
@@ -171,6 +169,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                     "OPTIONAL MATCH (node)<-[:r]->(related_node) " +
                     "RETURN " +
                     FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
+                    Neo4jSubGraphExtractor.edgeSpecificPropertiesQueryPartUsingPrefix("node") +
                     "related_node.label, related_node.uri, " +
                     "labels(node) as type";
         }
