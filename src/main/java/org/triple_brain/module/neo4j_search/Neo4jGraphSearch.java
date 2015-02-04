@@ -14,6 +14,7 @@ import org.triple_brain.module.model.User;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
+import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.edge.Neo4jEdgeOperator;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceQueryBuilder;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.schema.Neo4jSchemaOperator;
@@ -23,6 +24,7 @@ import org.triple_brain.module.search.GraphSearch;
 import org.triple_brain.module.search.VertexSearchResult;
 
 import javax.inject.Inject;
+import javax.xml.transform.Result;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,28 +46,13 @@ public class Neo4jGraphSearch implements GraphSearch {
 
     @Override
     public List<VertexSearchResult> searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(String searchTerm, User user) {
-        QueryResult<Map<String, Object>> results = queryEngine.query(
-                buildQuery(
-                        searchTerm,
-                        false,
-                        user.username(),
-                        Neo4jVertexInSubGraphOperator.NEO4J_LABEL_NAME,
-                        Neo4jSchemaOperator.NEO4J_LABEL_NAME
-                ),
-                Neo4jRestApiUtils.map(
-                        "owner", user.username()
-                )
+        return new Getter<VertexSearchResult>().get(
+                searchTerm,
+                false,
+                user.username(),
+                Neo4jVertexInSubGraphOperator.NEO4J_LABEL_NAME,
+                Neo4jSchemaOperator.NEO4J_LABEL_NAME
         );
-        List<VertexSearchResult> searchResults = new ArrayList<>();
-        for (Map<String, Object> row : results) {
-            VertexSearchResult searchResult = new VertexSearchResult(
-                    GraphElementFromExtractorQueryRow.usingRowAndKey(row, "node").build()
-            );
-            searchResults.add(
-                    searchResult
-            );
-        }
-        return searchResults;
     }
 
     @Override
@@ -75,36 +62,24 @@ public class Neo4jGraphSearch implements GraphSearch {
 
     @Override
     public List<VertexSearchResult> searchOnlyForOwnVerticesForAutoCompletionByLabel(String searchTerm, User user) {
-        QueryResult<Map<String, Object>> results = queryEngine.query(
-                buildQuery(
-                        searchTerm,
-                        true,
-                        user.username(),
-                        Neo4jVertexInSubGraphOperator.NEO4J_LABEL_NAME
-                ),
-                Neo4jRestApiUtils.map(
-                        "owner", user.username()
-                )
+        return new Getter<VertexSearchResult>().get(
+                searchTerm,
+                true,
+                user.username(),
+                Neo4jVertexInSubGraphOperator.NEO4J_LABEL_NAME
         );
-        List<VertexSearchResult> searchResults = new ArrayList<>();
-        for (Map<String, Object> row : results) {
-            VertexSearchResult searchResult = new VertexSearchResult(
-                    GraphElementFromExtractorQueryRow.usingRowAndKey(row, "node").build()
-            );
-            searchResults.add(
-                    searchResult
-            );
-        }
-        return searchResults;
-    }
-
-    private String formatSearchTerm(String searchTerm) {
-        return searchTerm.replace(" ", " AND ");
     }
 
     @Override
     public List<GraphElementSearchResult> searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(String searchTerm, User user) {
-        return null;
+        return new Getter<GraphElementSearchResult>().get(
+                searchTerm,
+                false,
+                user.username(),
+                Neo4jSchemaOperator.NEO4J_LABEL_NAME,
+                Neo4jSchemaOperator.NEO4J_PROPERTY_LABEL_NAME,
+                Neo4jEdgeOperator.NEO4J_LABEL_NAME
+        );
     }
 
     @Override
@@ -112,19 +87,54 @@ public class Neo4jGraphSearch implements GraphSearch {
         return null;
     }
 
-    private String buildQuery(String searchTerm, Boolean forPersonal, String username, String ... graphElementTypes) {
-        return "START node=node:node_auto_index('" +
-                Neo4jFriendlyResource.props.label + ":(" + formatSearchTerm(searchTerm) + "*) AND " +
-                (forPersonal ? "owner:" + username : "(is_public:true OR owner:" + username + ")") + " AND " +
-                "( " + Neo4jFriendlyResource.props.type + ":" + StringUtils.join(graphElementTypes, " OR type:") + ") " +
-                "') " +
-//                "MATCH (node:vertex|schema) "+
-//                "OPTIONAL MATCH (node)<-[:r]->(relation_node) " +
-//                "WHERE (node:" + StringUtils.join(graphElementTypes, " OR node:") + ") " +
-//                "WHERE 'vertex' IN labels(node) OR  'schema' IN labels(node) " +
-//                "WHERE ('node:vertex') OR ('node:schema') " +
-                "RETURN " +
-                FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
-                "1";
+    private class Getter<ResultType> {
+
+        public List<ResultType> get(
+                String searchTerm,
+                Boolean forPersonal,
+                String username,
+                String... graphElementTypes
+        ) {
+            QueryResult<Map<String, Object>> results = queryEngine.query(
+                    buildQuery(
+                            searchTerm,
+                            forPersonal,
+                            username,
+                            graphElementTypes
+                    ),
+                    Neo4jRestApiUtils.map(
+                            "owner", username
+                    )
+            );
+            List<ResultType> searchResults = new ArrayList<>();
+            for (Map<String, Object> row : results) {
+                ResultType searchResult = (ResultType) new VertexSearchResult(
+                        GraphElementFromExtractorQueryRow.usingRowAndKey(row, "node").build()
+                );
+                searchResults.add(
+                        searchResult
+                );
+            }
+            return searchResults;
+        }
+
+        private String buildQuery(
+                String searchTerm,
+                Boolean forPersonal,
+                String username,
+                String... graphElementTypes
+        ) {
+            return "START node=node:node_auto_index('" +
+                    Neo4jFriendlyResource.props.label + ":(" + formatSearchTerm(searchTerm) + "*) AND " +
+                    (forPersonal ? "owner:" + username : "(is_public:true OR owner:" + username + ")") + " AND " +
+                    "( " + Neo4jFriendlyResource.props.type + ":" + StringUtils.join(graphElementTypes, " OR type:") + ") " +
+                    "') " +
+                    "RETURN " +
+                    FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
+                    "labels(node) as type";
+        }
+        private String formatSearchTerm(String searchTerm) {
+            return searchTerm.replace(" ", " AND ");
+        }
     }
 }

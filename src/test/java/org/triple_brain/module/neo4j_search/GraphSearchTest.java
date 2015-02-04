@@ -6,6 +6,10 @@ package org.triple_brain.module.neo4j_search;
 
 import org.junit.Test;
 import org.triple_brain.module.model.graph.GraphElement;
+import org.triple_brain.module.model.graph.edge.Edge;
+import org.triple_brain.module.model.graph.schema.SchemaOperator;
+import org.triple_brain.module.search.EdgeSearchResult;
+import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.VertexSearchResult;
 
 import java.util.List;
@@ -96,7 +100,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         );
         assertFalse(vertices.size() > 0);
     }
-    /*
+
     @Test
     public void searching_for_own_vertices_does_not_return_schemas() {
         SchemaOperator schema = createSchema(user);
@@ -150,6 +154,16 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
+    public void can_search_relations() {
+        indexGraph();
+        List<GraphElementSearchResult> results = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
+                "between vert",
+                user
+        );
+        assertThat(results.size(), is(2));
+    }
+/*
+    @Test
     public void relation_source_and_destination_vertex_uri_are_included_in_result() {
         indexGraph();
         List<GraphElementSearchResult> relations = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
@@ -163,17 +177,6 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         assertFalse(
                 null == edge.destinationVertex().uri()
         );
-    }
-
-    @Test
-    @Ignore("I dont know why but this test fails sometimes and succeeds in other times")
-    public void can_search_relations() {
-        indexGraph();
-        List<GraphElementSearchResult> results = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
-                "between vert",
-                user
-        );
-        assertThat(results.size(), is(2));
     }
 
     @Test
