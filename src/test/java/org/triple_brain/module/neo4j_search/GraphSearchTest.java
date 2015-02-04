@@ -162,7 +162,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         );
         assertThat(results.size(), is(2));
     }
-/*
+
     @Test
     public void relation_source_and_destination_vertex_uri_are_included_in_result() {
         indexGraph();
@@ -178,6 +178,8 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
                 null == edge.destinationVertex().uri()
         );
     }
+
+/*
 
     @Test
     public void schemas_are_included_in_relations_search() {

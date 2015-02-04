@@ -11,6 +11,7 @@ import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.rest.graphdb.query.QueryEngine;
 import org.neo4j.rest.graphdb.util.QueryResult;
 import org.triple_brain.module.model.User;
+import org.triple_brain.module.model.graph.edge.EdgePojo;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
@@ -19,6 +20,7 @@ import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.Fri
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.schema.Neo4jSchemaOperator;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.vertex.Neo4jVertexInSubGraphOperator;
+import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.GraphSearch;
 import org.triple_brain.module.search.VertexSearchResult;
@@ -108,14 +110,51 @@ public class Neo4jGraphSearch implements GraphSearch {
             );
             List<ResultType> searchResults = new ArrayList<>();
             for (Map<String, Object> row : results) {
-                ResultType searchResult = (ResultType) new VertexSearchResult(
-                        GraphElementFromExtractorQueryRow.usingRowAndKey(row, "node").build()
-                );
                 searchResults.add(
-                        searchResult
+                        buildResult(row)
                 );
             }
             return searchResults;
+        }
+
+        private ResultType buildResult(Map<String, Object> row){
+            String resultType = nodeTypeInRow(row);
+            switch(resultType){
+                case Neo4jVertexInSubGraphOperator.NEO4J_LABEL_NAME:
+                    return (ResultType) buildVertexSearchResult(row);
+                case Neo4jEdgeOperator.NEO4J_LABEL_NAME:
+                    return (ResultType) buildEdgeSearchResult(row);
+                case Neo4jSchemaOperator.NEO4J_LABEL_NAME:
+                    return (ResultType) buildVertexSearchResult(row);
+            }
+            throw new RuntimeException("result type does not exist " + resultType);
+        }
+
+        private String nodeTypeInRow(Map<String, Object> row){
+            String resultType = row.get("type").toString();
+            return resultType.substring(1, resultType.length() -1);
+        }
+
+        private VertexSearchResult buildVertexSearchResult(Map<String, Object> row){
+            return new VertexSearchResult(
+                    GraphElementFromExtractorQueryRow.usingRowAndKey(row, "node").build()
+            );
+        }
+
+        private VertexSearchResult buildSchemaSearchResult(Map<String, Object> row){
+            return new VertexSearchResult(
+                    GraphElementFromExtractorQueryRow.usingRowAndKey(row, "node").build()
+            );
+        }
+
+        private EdgeSearchResult buildEdgeSearchResult(Map<String, Object> row){
+            return new EdgeSearchResult(
+                    new EdgePojo(
+                            GraphElementFromExtractorQueryRow.usingRowAndKey(row, "node").build(),
+                            null,
+                            null
+                    )
+            );
         }
 
         private String buildQuery(
@@ -129,8 +168,10 @@ public class Neo4jGraphSearch implements GraphSearch {
                     (forPersonal ? "owner:" + username : "(is_public:true OR owner:" + username + ")") + " AND " +
                     "( " + Neo4jFriendlyResource.props.type + ":" + StringUtils.join(graphElementTypes, " OR type:") + ") " +
                     "') " +
+                    "OPTIONAL MATCH (node)<-[:r]->(related_node) " +
                     "RETURN " +
                     FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
+                    "related_node.label, related_node.uri, " +
                     "labels(node) as type";
         }
         private String formatSearchTerm(String searchTerm) {
