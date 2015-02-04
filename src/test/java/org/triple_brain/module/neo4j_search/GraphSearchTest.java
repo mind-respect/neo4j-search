@@ -6,6 +6,7 @@ package org.triple_brain.module.neo4j_search;
 
 import org.junit.Test;
 import org.triple_brain.module.model.graph.GraphElement;
+import org.triple_brain.module.model.graph.GraphElementPojo;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.search.EdgeSearchResult;
@@ -199,8 +200,6 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         );
     }
 
-/*
-
     @Test
     public void schemas_are_included_in_relations_search() {
         List<GraphElementSearchResult> results = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
@@ -221,20 +220,6 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
                 user
         );
         assertFalse(results.isEmpty());
-    }
-
-    @Test
-    public void can_search_by_uri() {
-        indexGraph();
-        GraphElementSearchResult searchResult = graphSearch.getByUri(
-                vertexA.uri(),
-                user
-        );
-        GraphElement vertex = searchResult.getGraphElementSearchResult().getGraphElement();
-        assertThat(
-                vertex.label(),
-                is(vertexA.label())
-        );
     }
 
     @Test
@@ -260,7 +245,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
                 )
         );
     }
-
+/*
     @Test
     public void schema_properties_can_be_retrieved() throws Exception {
         SchemaOperator schema = createSchema(userGraph.user());
@@ -453,6 +438,20 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         assertThat(
                 vertex.getIdentifications().size(),
                 is(1)
+        );
+    }
+
+@Test
+    public void can_search_by_uri() {
+        indexGraph();
+        GraphElementSearchResult searchResult = graphSearch.getByUri(
+                vertexA.uri(),
+                user
+        );
+        GraphElement vertex = searchResult.getGraphElementSearchResult().getGraphElement();
+        assertThat(
+                vertex.label(),
+                is(vertexA.label())
         );
     }
 
