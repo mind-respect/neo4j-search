@@ -10,6 +10,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.rest.graphdb.query.QueryEngine;
 import org.neo4j.rest.graphdb.util.QueryResult;
+import org.apache.lucene.queryParser.QueryParser;
 import org.triple_brain.module.model.User;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
@@ -212,7 +213,7 @@ public class Neo4jGraphSearch implements GraphSearch {
         }
 
         private String formatSearchTerm(String searchTerm) {
-            return searchTerm.replace(" ", " AND ");
+            return QueryParser.escape(searchTerm).replace("\\","\\\\").replace(" ", " AND ");
         }
 
     }

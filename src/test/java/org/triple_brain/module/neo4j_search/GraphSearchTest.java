@@ -402,7 +402,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         );
     }
 
-    /*
+
     @Test
     public void search_results_contains_comment() {
         SchemaOperator schema = createSchema(user);
@@ -424,20 +424,22 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         );
     }
 
+
     @Test
     public void search_queries_can_have_special_characters() {
-        vertexA.label("a(test*");
+        vertexA.label("a\\(test*");
         indexGraph();
         List<VertexSearchResult> vertices = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
-                "a(test*",
+                "a\\(test*",
                 user
         );
         GraphElement vertex = vertices.get(0).getGraphElementSearchResult().getGraphElement();
         assertThat(
                 vertex.label(),
-                is("a(test*")
+                is("a\\(test*")
         );
     }
+    /*
 
     @Test
     public void has_identifications(){
