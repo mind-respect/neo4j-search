@@ -348,6 +348,24 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         assertFalse(searchResults.isEmpty());
     }
 
+    @Test
+    public void can_search_not_owned_schema_property() {
+        SchemaOperator schema = createSchema(user);
+        GraphElementOperator property1 = schema.addProperty();
+        property1.label("prop");
+        graphIndexer.indexSchema(
+                userGraph.schemaPojoWithUri(
+                        schema.uri()
+                )
+        );
+        graphIndexer.commit();
+        List<GraphElementSearchResult> searchResults = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
+                "prop",
+                user2
+        );
+        assertFalse(searchResults.isEmpty());
+    }
+
     /*
 
     @Test
