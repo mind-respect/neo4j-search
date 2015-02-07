@@ -330,7 +330,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
                 is(1)
         );
     }
-/*
+
     @Test
     public void can_search_not_owned_schema() {
         SchemaOperator schema = createSchema(user);
@@ -347,6 +347,8 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         );
         assertFalse(searchResults.isEmpty());
     }
+
+    /*
 
     @Test
     public void can_search_for_only_owned_schemas() {
