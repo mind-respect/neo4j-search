@@ -13,6 +13,7 @@ import org.neo4j.rest.graphdb.util.QueryResult;
 import org.apache.lucene.queryParser.QueryParser;
 import org.triple_brain.module.model.User;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
+import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResourceFactory;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.edge.Neo4jEdgeOperator;
@@ -45,6 +46,7 @@ public class Neo4jGraphSearch implements GraphSearch {
 
     @Inject
     ReadableIndex<Node> nodeIndex;
+
 
     @Override
     public List<VertexSearchResult> searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(String searchTerm, User user) {
@@ -92,12 +94,28 @@ public class Neo4jGraphSearch implements GraphSearch {
 
     @Override
     public GraphElementSearchResult getByUri(URI uri, User user) {
-        return null;
+        return new Getter<GraphElementSearchResult>().getForUri(
+                uri,
+                user.username()
+        );
     }
 
     private class Getter<ResultType extends GraphElementSearchResult> {
         private final String nodePrefix = "node";
         private List<ResultType> searchResults = new ArrayList<>();
+
+        public GraphElementSearchResult getForUri(URI uri, String username){
+            String query = "START node=node:node_auto_index('uri:" + uri + " AND " +
+                    "owner:" + username + "') " +
+                    "RETURN " +
+                    FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
+                    Neo4jSubGraphExtractor.edgeSpecificPropertiesQueryPartUsingPrefix("node") +
+                    "labels(node) as type";
+            return getUsingQuery(
+                    query,
+                    username
+            ).get(0);
+        }
 
         public List<ResultType> get(
                 String searchTerm,
@@ -105,13 +123,20 @@ public class Neo4jGraphSearch implements GraphSearch {
                 String username,
                 String... graphElementTypes
         ) {
-            QueryResult<Map<String, Object>> rows = queryEngine.query(
+            return getUsingQuery(
                     buildQuery(
                             searchTerm,
                             forPersonal,
                             username,
                             graphElementTypes
                     ),
+                    username
+            );
+        }
+
+        private List<ResultType> getUsingQuery(String query, String username){
+            QueryResult<Map<String, Object>> rows = queryEngine.query(
+                    query,
                     Neo4jRestApiUtils.map(
                             "owner", username
                     )
@@ -123,7 +148,7 @@ public class Neo4jGraphSearch implements GraphSearch {
         }
 
         private void addOrUpdateResult(Map<String, Object> row) {
-            printRow(row);
+//            printRow(row);
             SearchResultBuilder searchResultBuilder = getFromRow(row);
             if (isForUpdate(row)) {
                 GraphElementSearchResult graphElementSearchResult = searchResultBuilder.update(
@@ -213,7 +238,7 @@ public class Neo4jGraphSearch implements GraphSearch {
         }
 
         private String formatSearchTerm(String searchTerm) {
-            return QueryParser.escape(searchTerm).replace("\\","\\\\").replace(" ", " AND ");
+            return QueryParser.escape(searchTerm).replace("\\", "\\\\").replace(" ", " AND ");
         }
 
     }

@@ -19,9 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class GraphSearchTest extends Neo4jSearchRelatedTest {
 
@@ -194,7 +192,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
                 "between vert",
                 user
         );
-        Edge edge = ((EdgeSearchResult)relations.get(0)).getEdge();
+        Edge edge = ((EdgeSearchResult) relations.get(0)).getEdge();
         assertFalse(
                 null == edge.sourceVertex().uri()
         );
@@ -297,7 +295,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
-    public void can_search_schema_property(){
+    public void can_search_schema_property() {
         SchemaOperator schema = createSchema(userGraph.user());
         schema.label("schema1");
         graphIndexer.indexSchema(
@@ -439,10 +437,10 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
                 is("a\\(test*")
         );
     }
-    /*
+
 
     @Test
-    public void has_identifications(){
+    public void does_no_have_identifications() {
         indexGraph();
         GraphElement vertex = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 vertexA.label(),
@@ -462,11 +460,11 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         ).get(0).getGraphElementSearchResult().getGraphElement();
         assertThat(
                 vertex.getIdentifications().size(),
-                is(1)
+                is(0)
         );
     }
 
-@Test
+    @Test
     public void can_search_by_uri() {
         indexGraph();
         GraphElementSearchResult searchResult = graphSearch.getByUri(
@@ -481,10 +479,22 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
-    public void has_number_of_references_to_an_identification(){
+    public void cannot_get_by_uri_if_not_owner_element_not_public() {
+        try{
+            graphSearch.getByUri(
+                    vertexA.uri(),
+                    user2
+            );
+            fail();
+        }catch(Exception e){
+
+        }
+    }
+
+    @Test
+    public void has_number_of_references_to_an_identification() {
 
     }
 
-*/
 
 }
