@@ -6,6 +6,7 @@ package org.triple_brain.module.neo4j_search;
 
 import org.junit.Test;
 import org.triple_brain.module.model.graph.GraphElement;
+import org.triple_brain.module.model.graph.GraphElementOperator;
 import org.triple_brain.module.model.graph.GraphElementPojo;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
@@ -13,7 +14,9 @@ import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.VertexSearchResult;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
@@ -245,7 +248,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
                 )
         );
     }
-/*
+
     @Test
     public void schema_properties_can_be_retrieved() throws Exception {
         SchemaOperator schema = createSchema(userGraph.user());
@@ -292,6 +295,8 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
                 properties.containsKey(property2.uri())
         );
     }
+
+    /*
 
     @Test
     public void can_search_schema_property(){

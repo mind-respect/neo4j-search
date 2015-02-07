@@ -11,28 +11,32 @@ import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.rest.graphdb.query.QueryEngine;
 import org.neo4j.rest.graphdb.util.QueryResult;
 import org.triple_brain.module.model.User;
+import org.triple_brain.module.model.graph.FriendlyResourcePojo;
+import org.triple_brain.module.model.graph.GraphElementPojo;
 import org.triple_brain.module.model.graph.edge.EdgePojo;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.edge.Neo4jEdgeOperator;
+import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceQueryBuilder;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.EdgeFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.Neo4jSubGraphExtractor;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.schema.Neo4jSchemaOperator;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.vertex.Neo4jVertexInSubGraphOperator;
+import org.triple_brain.module.neo4j_search.result_builder.RelationSearchResultBuilder;
+import org.triple_brain.module.neo4j_search.result_builder.SchemaSearchResultBuilder;
+import org.triple_brain.module.neo4j_search.result_builder.SearchResultBuilder;
+import org.triple_brain.module.neo4j_search.result_builder.VertexSearchResultBuilder;
 import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.GraphSearch;
 import org.triple_brain.module.search.VertexSearchResult;
 
 import javax.inject.Inject;
-import javax.xml.transform.Result;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Neo4jGraphSearch implements GraphSearch {
 
@@ -91,15 +95,16 @@ public class Neo4jGraphSearch implements GraphSearch {
         return null;
     }
 
-    private class Getter<ResultType> {
-
+    private class Getter<ResultType extends GraphElementSearchResult> {
+        private final String nodePrefix = "node";
+        private List<ResultType> searchResults = new ArrayList<>();
         public List<ResultType> get(
                 String searchTerm,
                 Boolean forPersonal,
                 String username,
                 String... graphElementTypes
         ) {
-            QueryResult<Map<String, Object>> results = queryEngine.query(
+            QueryResult<Map<String, Object>> rows = queryEngine.query(
                     buildQuery(
                             searchTerm,
                             forPersonal,
@@ -110,26 +115,44 @@ public class Neo4jGraphSearch implements GraphSearch {
                             "owner", username
                     )
             );
-            List<ResultType> searchResults = new ArrayList<>();
-            for (Map<String, Object> row : results) {
-                searchResults.add(
-                        buildResult(row)
-                );
+            for (Map<String, Object> row : rows) {
+                addOrUpdateResult(row);
             }
             return searchResults;
         }
 
-        private ResultType buildResult(Map<String, Object> row){
+        private void addOrUpdateResult(Map<String, Object> row){
+            printRow(row);
+            SearchResultBuilder searchResultBuilder = getFromRow(row);
+            if(isForUpdate(row)){
+                searchResultBuilder.update(
+                        getLastAddedResult()
+                );
+            }else{
+                searchResults.add(
+                        (ResultType) searchResultBuilder.build()
+                );
+            }
+        }
+
+        private SearchResultBuilder getFromRow(Map<String, Object> row){
             String resultType = nodeTypeInRow(row);
             switch(resultType){
                 case Neo4jVertexInSubGraphOperator.NEO4J_LABEL_NAME:
-                    return (ResultType) buildVertexSearchResult(row);
+                    return new VertexSearchResultBuilder(row, nodePrefix);
                 case Neo4jEdgeOperator.NEO4J_LABEL_NAME:
-                    return (ResultType) buildEdgeSearchResult(row);
+                    return new RelationSearchResultBuilder(row, nodePrefix);
                 case Neo4jSchemaOperator.NEO4J_LABEL_NAME:
-                    return (ResultType) buildSchemaSearchResult(row);
+                    return new SchemaSearchResultBuilder(row, nodePrefix);
             }
             throw new RuntimeException("result type " + resultType + " does not exist");
+        }
+
+        private void printRow(Map<String, Object> row){
+            System.out.println("*************printing row*****************");
+            for(String key : row.keySet()){
+                System.out.println(key + " " + row.get(key));
+            }
         }
 
         private String nodeTypeInRow(Map<String, Object> row){
@@ -137,22 +160,23 @@ public class Neo4jGraphSearch implements GraphSearch {
             return resultType.substring(1, resultType.length() -1);
         }
 
-        private VertexSearchResult buildVertexSearchResult(Map<String, Object> row){
-            return new VertexSearchResult(
-                    GraphElementFromExtractorQueryRow.usingRowAndKey(row, "node").build()
+
+
+        private Boolean isForUpdate(Map<String, Object> row){
+            return !searchResults.isEmpty() && getUriInRow(row).equals(
+                    getLastAddedResult().getGraphElement().uri()
             );
         }
 
-        private VertexSearchResult buildSchemaSearchResult(Map<String, Object> row){
-            return new VertexSearchResult(
-                    GraphElementFromExtractorQueryRow.usingRowAndKey(row, "node").build()
-            );
+        private ResultType getLastAddedResult(){
+            return searchResults.get(searchResults.size() -1);
         }
 
-        private EdgeSearchResult buildEdgeSearchResult(Map<String, Object> row){
-            return new EdgeSearchResult(
-                    (EdgePojo) EdgeFromExtractorQueryRow.usingRowAndKey(row, "node").build()
-            );
+        private URI getUriInRow(Map<String, Object> row){
+            return FriendlyResourceFromExtractorQueryRow.usingRowAndPrefix(
+                    row,
+                    "node"
+            ).getUri();
         }
 
         private String buildQuery(
@@ -166,7 +190,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                     (forPersonal ? "owner:" + username : "(is_public:true OR owner:" + username + ")") + " AND " +
                     "( " + Neo4jFriendlyResource.props.type + ":" + StringUtils.join(graphElementTypes, " OR type:") + ") " +
                     "') " +
-                    "OPTIONAL MATCH (node)<-[:r]->(related_node) " +
+                    "OPTIONAL MATCH node<-[]->related_node " +
                     "RETURN " +
                     FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
                     Neo4jSubGraphExtractor.edgeSpecificPropertiesQueryPartUsingPrefix("node") +
@@ -176,5 +200,6 @@ public class Neo4jGraphSearch implements GraphSearch {
         private String formatSearchTerm(String searchTerm) {
             return searchTerm.replace(" ", " AND ");
         }
+
     }
 }
