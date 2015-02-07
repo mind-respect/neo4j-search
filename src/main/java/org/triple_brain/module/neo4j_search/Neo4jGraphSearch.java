@@ -25,10 +25,7 @@ import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.sub
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.Neo4jSubGraphExtractor;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.schema.Neo4jSchemaOperator;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.vertex.Neo4jVertexInSubGraphOperator;
-import org.triple_brain.module.neo4j_search.result_builder.RelationSearchResultBuilder;
-import org.triple_brain.module.neo4j_search.result_builder.SchemaSearchResultBuilder;
-import org.triple_brain.module.neo4j_search.result_builder.SearchResultBuilder;
-import org.triple_brain.module.neo4j_search.result_builder.VertexSearchResultBuilder;
+import org.triple_brain.module.neo4j_search.result_builder.*;
 import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.GraphSearch;
@@ -157,6 +154,8 @@ public class Neo4jGraphSearch implements GraphSearch {
                     return new RelationSearchResultBuilder(row, nodePrefix);
                 case Neo4jSchemaOperator.NEO4J_LABEL_NAME:
                     return new SchemaSearchResultBuilder(row, nodePrefix);
+                case Neo4jSchemaOperator.NEO4J_PROPERTY_LABEL_NAME:
+                    return new PropertySearchResultBuilder(row, nodePrefix);
             }
             throw new RuntimeException("result type " + resultType + " does not exist");
         }

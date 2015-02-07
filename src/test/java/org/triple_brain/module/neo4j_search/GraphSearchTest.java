@@ -296,8 +296,6 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         );
     }
 
-    /*
-
     @Test
     public void can_search_schema_property(){
         SchemaOperator schema = createSchema(userGraph.user());
@@ -326,13 +324,13 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         graphIndexer.commit();
         assertThat(
                 graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
-                        "prop",
+                        "prop1",
                         userGraph.user()
                 ).size(),
                 is(1)
         );
     }
-
+/*
     @Test
     public void can_search_not_owned_schema() {
         SchemaOperator schema = createSchema(user);
