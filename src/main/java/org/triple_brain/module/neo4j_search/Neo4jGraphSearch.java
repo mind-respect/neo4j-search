@@ -11,29 +11,25 @@ import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.rest.graphdb.query.QueryEngine;
 import org.neo4j.rest.graphdb.util.QueryResult;
 import org.triple_brain.module.model.User;
-import org.triple_brain.module.model.graph.FriendlyResourcePojo;
-import org.triple_brain.module.model.graph.GraphElementPojo;
-import org.triple_brain.module.model.graph.edge.EdgePojo;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.edge.Neo4jEdgeOperator;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceQueryBuilder;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.EdgeFromExtractorQueryRow;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.Neo4jSubGraphExtractor;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.schema.Neo4jSchemaOperator;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.vertex.Neo4jVertexInSubGraphOperator;
 import org.triple_brain.module.neo4j_search.result_builder.*;
-import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.GraphSearch;
 import org.triple_brain.module.search.VertexSearchResult;
 
 import javax.inject.Inject;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class Neo4jGraphSearch implements GraphSearch {
 
@@ -61,8 +57,14 @@ public class Neo4jGraphSearch implements GraphSearch {
     }
 
     @Override
-    public List<VertexSearchResult> searchOnlyForOwnVerticesOrSchemasForAutoCompletionByLabel(String label, User user) {
-        return null;
+    public List<VertexSearchResult> searchOnlyForOwnVerticesOrSchemasForAutoCompletionByLabel(String searchTerm, User user) {
+        return new Getter<VertexSearchResult>().get(
+                searchTerm,
+                true,
+                user.username(),
+                Neo4jVertexInSubGraphOperator.NEO4J_LABEL_NAME,
+                Neo4jSchemaOperator.NEO4J_LABEL_NAME
+        );
     }
 
     @Override
