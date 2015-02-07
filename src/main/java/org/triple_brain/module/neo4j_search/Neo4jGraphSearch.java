@@ -98,6 +98,7 @@ public class Neo4jGraphSearch implements GraphSearch {
     private class Getter<ResultType extends GraphElementSearchResult> {
         private final String nodePrefix = "node";
         private List<ResultType> searchResults = new ArrayList<>();
+
         public List<ResultType> get(
                 String searchTerm,
                 Boolean forPersonal,
@@ -121,23 +122,35 @@ public class Neo4jGraphSearch implements GraphSearch {
             return searchResults;
         }
 
-        private void addOrUpdateResult(Map<String, Object> row){
+        private void addOrUpdateResult(Map<String, Object> row) {
             printRow(row);
             SearchResultBuilder searchResultBuilder = getFromRow(row);
-            if(isForUpdate(row)){
-                searchResultBuilder.update(
+            if (isForUpdate(row)) {
+                GraphElementSearchResult graphElementSearchResult = searchResultBuilder.update(
                         getLastAddedResult()
                 );
-            }else{
+                searchResults.set(
+                        searchResults.size() - 1,
+                        (ResultType) graphElementSearchResult
+                );
+            } else {
+                GraphElementSearchResult graphElementSearchResult = searchResultBuilder.build();
+                if(hasRelatedNodes(row)){
+                    graphElementSearchResult =searchResultBuilder.update(graphElementSearchResult);
+                }
                 searchResults.add(
-                        (ResultType) searchResultBuilder.build()
+                        (ResultType) graphElementSearchResult
                 );
             }
         }
 
-        private SearchResultBuilder getFromRow(Map<String, Object> row){
+        private Boolean hasRelatedNodes(Map<String, Object> row){
+            return row.get("related_node.uri") != null;
+        }
+
+        private SearchResultBuilder getFromRow(Map<String, Object> row) {
             String resultType = nodeTypeInRow(row);
-            switch(resultType){
+            switch (resultType) {
                 case Neo4jVertexInSubGraphOperator.NEO4J_LABEL_NAME:
                     return new VertexSearchResultBuilder(row, nodePrefix);
                 case Neo4jEdgeOperator.NEO4J_LABEL_NAME:
@@ -148,31 +161,30 @@ public class Neo4jGraphSearch implements GraphSearch {
             throw new RuntimeException("result type " + resultType + " does not exist");
         }
 
-        private void printRow(Map<String, Object> row){
+        private void printRow(Map<String, Object> row) {
             System.out.println("*************printing row*****************");
-            for(String key : row.keySet()){
+            for (String key : row.keySet()) {
                 System.out.println(key + " " + row.get(key));
             }
         }
 
-        private String nodeTypeInRow(Map<String, Object> row){
+        private String nodeTypeInRow(Map<String, Object> row) {
             String resultType = row.get("type").toString();
-            return resultType.substring(1, resultType.length() -1);
+            return resultType.substring(1, resultType.length() - 1);
         }
 
 
-
-        private Boolean isForUpdate(Map<String, Object> row){
+        private Boolean isForUpdate(Map<String, Object> row) {
             return !searchResults.isEmpty() && getUriInRow(row).equals(
                     getLastAddedResult().getGraphElement().uri()
             );
         }
 
-        private ResultType getLastAddedResult(){
-            return searchResults.get(searchResults.size() -1);
+        private ResultType getLastAddedResult() {
+            return searchResults.get(searchResults.size() - 1);
         }
 
-        private URI getUriInRow(Map<String, Object> row){
+        private URI getUriInRow(Map<String, Object> row) {
             return FriendlyResourceFromExtractorQueryRow.usingRowAndPrefix(
                     row,
                     "node"
@@ -197,6 +209,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                     "related_node.label, related_node.uri, " +
                     "labels(node) as type";
         }
+
         private String formatSearchTerm(String searchTerm) {
             return searchTerm.replace(" ", " AND ");
         }
