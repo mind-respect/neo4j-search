@@ -12,6 +12,7 @@ import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
+import org.triple_brain.module.search.PropertySearchResult;
 import org.triple_brain.module.search.VertexSearchResult;
 
 import java.net.URI;
@@ -326,6 +327,26 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
                         userGraph.user()
                 ).size(),
                 is(1)
+        );
+    }
+
+    @Test
+    public void schema_label_and_uri_are_included_in_property_search_result(){
+        SchemaOperator schema = createSchema(userGraph.user());
+        schema.label("schema1");
+        GraphElementOperator property1 = schema.addProperty();
+        property1.label("prop1");
+        PropertySearchResult searchResult = (PropertySearchResult) graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
+                "prop1",
+                userGraph.user()
+        ).get(0);
+        assertThat(
+                searchResult.getSchema().label(),
+                is("schema1")
+        );
+        assertThat(
+                searchResult.getSchema().uri(),
+                is(schema.uri())
         );
     }
 
