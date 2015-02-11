@@ -11,6 +11,7 @@ import org.triple_brain.module.model.graph.vertex.VertexOperator;
 import org.triple_brain.module.search.GraphIndexer;
 
 public class Neo4jGraphIndexer implements GraphIndexer{
+
     @Override
     public void indexWholeGraph() {
 

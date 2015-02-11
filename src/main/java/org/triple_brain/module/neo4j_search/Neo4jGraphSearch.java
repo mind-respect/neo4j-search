@@ -92,7 +92,7 @@ public class Neo4jGraphSearch implements GraphSearch {
     }
 
     @Override
-    public GraphElementSearchResult getByUri(URI uri, User user) {
+    public GraphElementSearchResult getDetails(URI uri, User user) {
         return new Getter<GraphElementSearchResult>().getForUri(
                 uri,
                 user.username()
@@ -230,7 +230,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                     "') " +
                     "OPTIONAL MATCH node<-[]->related_node " +
                     "RETURN " +
-                    FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
+                    "node.uri, node.label, node.creation_date, node.last_modification_date, " +
                     Neo4jSubGraphExtractor.edgeSpecificPropertiesQueryPartUsingPrefix("node") +
                     "related_node.label, related_node.uri, " +
                     "labels(node) as type";

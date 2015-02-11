@@ -55,7 +55,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
-    public void vertex_note_can_be_retrieved_from_search() throws Exception {
+    public void vertex_comment_is_not_included_in_search_result() throws Exception {
         vertexA.comment("A description");
         indexGraph();
         List<VertexSearchResult> searchResults = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
@@ -65,7 +65,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         GraphElement vertex = searchResults.get(0).getGraphElementSearchResult().getGraphElement();
         assertThat(
                 vertex.comment(),
-                is("A description")
+                is("")
         );
     }
 
@@ -402,7 +402,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
 
 
     @Test
-    public void search_results_contains_comment() {
+    public void schema_search_results_dont_have_comment() {
         SchemaOperator schema = createSchema(user);
         schema.label("schema1");
         schema.comment("test comment");
@@ -418,7 +418,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         ).get(0);
         assertThat(
                 result.getGraphElement().comment(),
-                is("test comment")
+                is("")
         );
     }
 
@@ -465,9 +465,9 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
-    public void can_search_by_uri() {
+    public void can_get_more_details_for_element_with_uri() {
         indexGraph();
-        GraphElementSearchResult searchResult = graphSearch.getByUri(
+        GraphElementSearchResult searchResult = graphSearch.getDetails(
                 vertexA.uri(),
                 user
         );
@@ -479,9 +479,23 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
+    public void more_details_contains_comment() {
+        vertexA.comment("A description");
+        indexGraph();
+        GraphElementSearchResult searchResult= graphSearch.getDetails(
+                vertexA.uri(),
+                user
+        );
+        assertThat(
+                searchResult.getGraphElement().comment(),
+                is("A description")
+        );
+    }
+
+    @Test
     public void cannot_get_by_uri_if_not_owner_element_not_public() {
         try{
-            graphSearch.getByUri(
+            graphSearch.getDetails(
                     vertexA.uri(),
                     user2
             );
