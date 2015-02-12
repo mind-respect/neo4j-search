@@ -120,11 +120,15 @@ public class Neo4jGraphSearch implements GraphSearch {
                             "owner", username
                     )
             );
+            Map<String, Object> row = rows.iterator().next();
             return new GraphElementSearchResultPojo(
                     GraphElementFromExtractorQueryRow.usingRowAndKey(
-                            rows.iterator().next(),
+                            row,
                             "node"
-                    ).build()
+                    ).build(),
+                    GraphElementType.valueOf(
+                            nodeTypeInRow(row)
+                    )
             );
         }
 
