@@ -12,6 +12,7 @@ import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.rest.graphdb.query.QueryEngine;
 import org.neo4j.rest.graphdb.util.QueryResult;
 import org.triple_brain.module.model.User;
+import org.triple_brain.module.model.graph.GraphElementType;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
@@ -55,8 +56,8 @@ public class Neo4jGraphSearch implements GraphSearch {
                 searchTerm,
                 false,
                 user.username(),
-                Neo4jVertexInSubGraphOperator.NEO4J_LABEL_NAME,
-                Neo4jSchemaOperator.NEO4J_LABEL_NAME
+                GraphElementType.vertex,
+                GraphElementType.schema
         );
     }
 
@@ -66,8 +67,8 @@ public class Neo4jGraphSearch implements GraphSearch {
                 searchTerm,
                 true,
                 user.username(),
-                Neo4jVertexInSubGraphOperator.NEO4J_LABEL_NAME,
-                Neo4jSchemaOperator.NEO4J_LABEL_NAME
+                GraphElementType.vertex,
+                GraphElementType.schema
         );
     }
 
@@ -77,7 +78,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                 searchTerm,
                 true,
                 user.username(),
-                Neo4jVertexInSubGraphOperator.NEO4J_LABEL_NAME
+                GraphElementType.vertex
         );
     }
 
@@ -87,9 +88,9 @@ public class Neo4jGraphSearch implements GraphSearch {
                 searchTerm,
                 false,
                 user.username(),
-                Neo4jSchemaOperator.NEO4J_LABEL_NAME,
-                Neo4jSchemaOperator.NEO4J_PROPERTY_LABEL_NAME,
-                Neo4jEdgeOperator.NEO4J_LABEL_NAME
+                GraphElementType.schema,
+                GraphElementType.property,
+                GraphElementType.edge
         );
     }
 
@@ -131,7 +132,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                 String searchTerm,
                 Boolean forPersonal,
                 String username,
-                String... graphElementTypes
+                GraphElementType ... graphElementTypes
         ) {
             return getUsingQuery(
                     buildQuery(
@@ -184,15 +185,17 @@ public class Neo4jGraphSearch implements GraphSearch {
         }
 
         private SearchResultBuilder getFromRow(Map<String, Object> row) {
-            String resultType = nodeTypeInRow(row);
+            GraphElementType resultType = GraphElementType.valueOf(
+                    nodeTypeInRow(row)
+            );
             switch (resultType) {
-                case Neo4jVertexInSubGraphOperator.NEO4J_LABEL_NAME:
+                case vertex:
                     return new VertexSearchResultBuilder(row, nodePrefix);
-                case Neo4jEdgeOperator.NEO4J_LABEL_NAME:
+                case edge:
                     return new RelationSearchResultBuilder(row, nodePrefix);
-                case Neo4jSchemaOperator.NEO4J_LABEL_NAME:
+                case schema:
                     return new SchemaSearchResultBuilder(row, nodePrefix);
-                case Neo4jSchemaOperator.NEO4J_PROPERTY_LABEL_NAME:
+                case property:
                     return new PropertySearchResultBuilder(row, nodePrefix);
             }
             throw new RuntimeException("result type " + resultType + " does not exist");
@@ -232,7 +235,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                 String searchTerm,
                 Boolean forPersonal,
                 String username,
-                String... graphElementTypes
+                GraphElementType... graphElementTypes
         ) {
             return "START node=node:node_auto_index('" +
                     Neo4jFriendlyResource.props.label + ":(" + formatSearchTerm(searchTerm) + "*) AND " +
