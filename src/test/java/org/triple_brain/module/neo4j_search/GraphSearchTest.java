@@ -459,6 +459,20 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         );
     }
 
+    @Test
+    public void search_queries_can_have_single_quotes() {
+        vertexA.label("a'test");
+        List<VertexSearchResult> vertices = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+                "a'test",
+                user
+        );
+        GraphElement vertex = vertices.get(0).getGraphElementSearchResult().getGraphElement();
+        assertThat(
+                vertex.label(),
+                is("a'test")
+        );
+    }
+
 
     @Test
     public void does_no_have_identifications() {

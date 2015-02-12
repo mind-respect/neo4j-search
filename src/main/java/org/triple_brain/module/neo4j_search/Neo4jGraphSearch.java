@@ -247,7 +247,9 @@ public class Neo4jGraphSearch implements GraphSearch {
                     "labels(node) as type";
         }
         private String formatSearchTerm(String searchTerm) {
-            return QueryParser.escape(searchTerm).replace("\\", "\\\\").replace(" ", " AND ");
+            return QueryParser.escape(searchTerm).replace(
+                    "\\", "\\\\"
+            ).replace("'","\\'").replace(" ", " AND ");
         }
     }
 }
