@@ -18,11 +18,13 @@ import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphEle
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.edge.Neo4jEdgeOperator;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceQueryBuilder;
+import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.Neo4jSubGraphExtractor;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.schema.Neo4jSchemaOperator;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.vertex.Neo4jVertexInSubGraphOperator;
 import org.triple_brain.module.neo4j_search.result_builder.*;
 import org.triple_brain.module.search.GraphElementSearchResult;
+import org.triple_brain.module.search.GraphElementSearchResultPojo;
 import org.triple_brain.module.search.GraphSearch;
 import org.triple_brain.module.search.VertexSearchResult;
 
@@ -110,10 +112,19 @@ public class Neo4jGraphSearch implements GraphSearch {
                     FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
                     Neo4jSubGraphExtractor.edgeSpecificPropertiesQueryPartUsingPrefix("node") +
                     "labels(node) as type";
-            return getUsingQuery(
+
+            QueryResult<Map<String, Object>> rows = queryEngine.query(
                     query,
-                    username
-            ).get(0);
+                    Neo4jRestApiUtils.map(
+                            "owner", username
+                    )
+            );
+            return new GraphElementSearchResultPojo(
+                    GraphElementFromExtractorQueryRow.usingRowAndKey(
+                            rows.iterator().next(),
+                            "node"
+                    ).build()
+            );
         }
 
         public List<ResultType> get(
@@ -235,10 +246,8 @@ public class Neo4jGraphSearch implements GraphSearch {
                     "related_node.label, related_node.uri, " +
                     "labels(node) as type";
         }
-
         private String formatSearchTerm(String searchTerm) {
             return QueryParser.escape(searchTerm).replace("\\", "\\\\").replace(" ", " AND ");
         }
-
     }
 }

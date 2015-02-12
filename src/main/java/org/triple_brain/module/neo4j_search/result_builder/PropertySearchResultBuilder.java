@@ -9,7 +9,6 @@ import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.Fri
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.PropertySearchResult;
-import org.triple_brain.module.search.VertexSearchResult;
 
 import java.util.Map;
 
@@ -30,7 +29,7 @@ public class PropertySearchResultBuilder implements SearchResultBuilder {
 
     @Override
     public GraphElementSearchResult build() {
-        return PropertySearchResult.forPropertyAndSchemaName(
+        return PropertySearchResult.forPropertyAndSchema(
                 GraphElementFromExtractorQueryRow.usingRowAndKey(row, prefix).build(),
                 new SchemaPojo(
                         FriendlyResourceFromExtractorQueryRow.usingRowAndNodeKey(row, "related_node").build()

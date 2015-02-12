@@ -500,6 +500,21 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
+    public void can_get_property_details() {
+        SchemaOperator schema = createSchema(userGraph.user());
+        GraphElementOperator property1 = schema.addProperty();
+        property1.label("prop1");
+        GraphElementSearchResult  searchResult = graphSearch.getDetails(
+                property1.uri(),
+                userGraph.user()
+        );
+        assertThat(
+                searchResult.getGraphElement().label(),
+                is("prop1")
+        );
+    }
+
+    @Test
     public void more_details_contains_comment() {
         vertexA.comment("A description");
         indexGraph();
