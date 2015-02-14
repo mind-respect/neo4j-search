@@ -27,7 +27,7 @@ public class SchemaSearchResultBuilder implements SearchResultBuilder{
     @Override
     public GraphElementSearchResult update(GraphElementSearchResult graphElementSearchResult) {
         VertexSearchResult searchResult = (VertexSearchResult) graphElementSearchResult;
-        GraphElementPojo property = buildProperty(row);
+        GraphElementPojo property = VertexSearchResultBuilder.buildProperty(row);
         searchResult.getProperties().put(
                 property.uri(),
                 property
@@ -40,19 +40,6 @@ public class SchemaSearchResultBuilder implements SearchResultBuilder{
         return new VertexSearchResult(
                 GraphElementFromExtractorQueryRow.usingRowAndKey(row, prefix).build(),
                 GraphElementType.schema
-        );
-    }
-
-    private GraphElementPojo buildProperty(Map<String, Object> row){
-        FriendlyResourceFromExtractorQueryRow extractor = FriendlyResourceFromExtractorQueryRow.usingRowAndNodeKey(
-                row,
-                "related_node"
-        );
-        return new GraphElementPojo(
-                new FriendlyResourcePojo(
-                        extractor.getUri(),
-                        extractor.getLabel()
-                )
         );
     }
 }

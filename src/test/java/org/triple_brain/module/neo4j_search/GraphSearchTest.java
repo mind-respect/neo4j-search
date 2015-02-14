@@ -556,6 +556,23 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
+    public void vertices_have_their_edges_label_in_result(){
+        VertexSearchResult searchResult = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
+                vertexA.label(),
+                user
+        ).iterator().next();
+        assertThat(
+                searchResult.getProperties().size(),
+                is(1)
+        );
+        Edge edge = vertexA.getEdgeThatLinksToDestinationVertex(vertexB);
+        assertThat(
+                searchResult.getProperties().get(edge.uri()).label(),
+                is("between vertex A and vertex B")
+        );
+    }
+
+    @Test
     public void has_number_of_references_to_an_identification() {
 
     }

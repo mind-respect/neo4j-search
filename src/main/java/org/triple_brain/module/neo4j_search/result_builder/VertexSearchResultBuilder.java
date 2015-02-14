@@ -4,7 +4,10 @@
 
 package org.triple_brain.module.neo4j_search.result_builder;
 
+import org.triple_brain.module.model.graph.FriendlyResourcePojo;
+import org.triple_brain.module.model.graph.GraphElementPojo;
 import org.triple_brain.module.model.graph.GraphElementType;
+import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.VertexSearchResult;
@@ -23,7 +26,13 @@ public class VertexSearchResultBuilder implements SearchResultBuilder {
 
     @Override
     public GraphElementSearchResult update(GraphElementSearchResult graphElementSearchResult) {
-        return graphElementSearchResult;
+        VertexSearchResult searchResult = (VertexSearchResult) graphElementSearchResult;
+        GraphElementPojo property = VertexSearchResultBuilder.buildProperty(row);
+        searchResult.getProperties().put(
+                property.uri(),
+                property
+        );
+        return searchResult;
     }
 
     @Override
@@ -31,6 +40,19 @@ public class VertexSearchResultBuilder implements SearchResultBuilder {
         return new VertexSearchResult(
                 GraphElementFromExtractorQueryRow.usingRowAndKey(row, prefix).build(),
                 GraphElementType.vertex
+        );
+    }
+
+    public static GraphElementPojo buildProperty(Map<String, Object> row){
+        FriendlyResourceFromExtractorQueryRow extractor = FriendlyResourceFromExtractorQueryRow.usingRowAndNodeKey(
+                row,
+                "related_node"
+        );
+        return new GraphElementPojo(
+                new FriendlyResourcePojo(
+                        extractor.getUri(),
+                        extractor.getLabel()
+                )
         );
     }
 }
