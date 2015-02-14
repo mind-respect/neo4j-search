@@ -163,7 +163,7 @@ public class Neo4jGraphSearch implements GraphSearch {
         }
 
         private void addOrUpdateResult(Map<String, Object> row) {
-//            printRow(row);
+            printRow(row);
             SearchResultBuilder searchResultBuilder = getFromRow(row);
             if (isForUpdate(row)) {
                 GraphElementSearchResult graphElementSearchResult = searchResultBuilder.update(
@@ -246,11 +246,11 @@ public class Neo4jGraphSearch implements GraphSearch {
                     (forPersonal ? "owner:" + username : "(is_public:true OR owner:" + username + ")") + " AND " +
                     "( " + Neo4jFriendlyResource.props.type + ":" + StringUtils.join(graphElementTypes, " OR type:") + ") " +
                     "') " +
-                    "OPTIONAL MATCH node<-[]->related_node " +
+                    "OPTIONAL MATCH node<-[relation]->related_node " +
                     "RETURN " +
                     "node.uri, node.label, node.creation_date, node.last_modification_date, " +
-                    Neo4jSubGraphExtractor.edgeSpecificPropertiesQueryPartUsingPrefix("node") +
                     "related_node.label, related_node.uri, " +
+                    "type(relation) as relation, " +
                     "labels(node) as type";
         }
         private String formatSearchTerm(String searchTerm) {

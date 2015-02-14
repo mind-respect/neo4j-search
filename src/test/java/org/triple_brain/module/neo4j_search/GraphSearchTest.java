@@ -10,6 +10,7 @@ import org.triple_brain.module.model.graph.GraphElementOperator;
 import org.triple_brain.module.model.graph.GraphElementPojo;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
+import org.triple_brain.module.model.graph.vertex.Vertex;
 import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.PropertySearchResult;
@@ -187,13 +188,33 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
-    public void relation_source_and_destination_vertex_uri_are_included_in_result() {
+    public void relation_source_and_destination_vertex_label_and_uri_are_included_in_result() {
         indexGraph();
         List<GraphElementSearchResult> relations = graphSearch.searchRelationsPropertiesOrSchemasForAutoCompletionByLabel(
-                "between vert",
+                "between vertex A and B",
                 user
         );
         Edge edge = ((EdgeSearchResult) relations.get(0)).getEdge();
+        Vertex sourceVertex = edge.sourceVertex();
+        Vertex destinationVertex = edge.destinationVertex();
+        assertThat(
+                sourceVertex.uri(),
+                is(vertexA.uri())
+        );
+        assertThat(
+                sourceVertex.label(),
+                is("vertex Azure")
+        );
+        assertThat(
+                destinationVertex.uri(),
+                is(vertexB.uri())
+        );
+        assertThat(
+                destinationVertex.label(),
+                is("vertex Bareau")
+        );
+
+        edge.sourceVertex().uri().equals(vertexA.uri());
         assertFalse(
                 null == edge.sourceVertex().uri()
         );
@@ -556,7 +577,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
-    public void vertices_have_their_edges_label_in_result(){
+    public void vertices_have_their_edges_label_and_uri_in_result(){
         VertexSearchResult searchResult = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 vertexA.label(),
                 user
