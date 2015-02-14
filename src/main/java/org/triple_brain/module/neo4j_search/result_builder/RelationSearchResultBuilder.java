@@ -4,14 +4,10 @@
 
 package org.triple_brain.module.neo4j_search.result_builder;
 
-import org.triple_brain.module.model.graph.GraphElement;
-import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.edge.EdgePojo;
 import org.triple_brain.module.model.graph.vertex.VertexInSubGraphPojo;
-import org.triple_brain.module.model.graph.vertex.VertexPojo;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Relationships;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceFromExtractorQueryRow;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.EdgeFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
 import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
