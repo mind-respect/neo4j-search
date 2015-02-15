@@ -163,7 +163,7 @@ public class Neo4jGraphSearch implements GraphSearch {
         }
 
         private void addOrUpdateResult(Map<String, Object> row) {
-            printRow(row);
+//            printRow(row);
             SearchResultBuilder searchResultBuilder = getFromRow(row);
             if (isForUpdate(row)) {
                 GraphElementSearchResult graphElementSearchResult = searchResultBuilder.update(
@@ -251,7 +251,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                     "node.uri, node.label, node.creation_date, node.last_modification_date, " +
                     "related_node.label, related_node.uri, " +
                     "type(relation) as relation, " +
-                    "labels(node) as type";
+                    "labels(node) as type limit 10";
         }
         private String formatSearchTerm(String searchTerm) {
             return QueryParser.escape(searchTerm).replace(
