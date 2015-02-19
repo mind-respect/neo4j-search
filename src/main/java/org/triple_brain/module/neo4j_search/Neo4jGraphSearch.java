@@ -16,18 +16,16 @@ import org.triple_brain.module.model.graph.GraphElementType;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.edge.Neo4jEdgeOperator;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceQueryBuilder;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.Neo4jSubGraphExtractor;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.schema.Neo4jSchemaOperator;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.vertex.Neo4jVertexInSubGraphOperator;
 import org.triple_brain.module.neo4j_search.result_builder.*;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResultPojo;
 import org.triple_brain.module.search.GraphSearch;
 import org.triple_brain.module.search.VertexSearchResult;
+import scala.collection.convert.Wrappers;
 
 import javax.inject.Inject;
 import java.net.URI;
@@ -106,11 +104,10 @@ public class Neo4jGraphSearch implements GraphSearch {
         private final String nodePrefix = "node";
         private List<ResultType> searchResults = new ArrayList<>();
 
-        public GraphElementSearchResult getForUri(URI uri, String username){
+        public GraphElementSearchResult getForUri(URI uri, String username) {
             String query = "START node=node:node_auto_index('uri:" + uri + " AND " +
                     "owner:" + username + "') " +
-                    "RETURN " +
-                    FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
+                    "RETURN " +                    FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
                     Neo4jSubGraphExtractor.edgeSpecificPropertiesQueryPartUsingPrefix("node") +
                     "labels(node) as type";
 
@@ -136,7 +133,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                 String searchTerm,
                 Boolean forPersonal,
                 String username,
-                GraphElementType ... graphElementTypes
+                GraphElementType... graphElementTypes
         ) {
             return getUsingQuery(
                     buildQuery(
@@ -149,7 +146,7 @@ public class Neo4jGraphSearch implements GraphSearch {
             );
         }
 
-        private List<ResultType> getUsingQuery(String query, String username){
+        private List<ResultType> getUsingQuery(String query, String username) {
             QueryResult<Map<String, Object>> rows = queryEngine.query(
                     query,
                     Neo4jRestApiUtils.map(
@@ -157,35 +154,18 @@ public class Neo4jGraphSearch implements GraphSearch {
                     )
             );
             for (Map<String, Object> row : rows) {
-                addOrUpdateResult(row);
+                addResult(row);
             }
             return searchResults;
         }
 
-        private void addOrUpdateResult(Map<String, Object> row) {
+        private void addResult(Map<String, Object> row) {
 //            printRow(row);
             SearchResultBuilder searchResultBuilder = getFromRow(row);
-            if (isForUpdate(row)) {
-                GraphElementSearchResult graphElementSearchResult = searchResultBuilder.update(
-                        getLastAddedResult()
-                );
-                searchResults.set(
-                        searchResults.size() - 1,
-                        (ResultType) graphElementSearchResult
-                );
-            } else {
-                GraphElementSearchResult graphElementSearchResult = searchResultBuilder.build();
-                if(hasRelatedNodes(row)){
-                    graphElementSearchResult =searchResultBuilder.update(graphElementSearchResult);
-                }
-                searchResults.add(
-                        (ResultType) graphElementSearchResult
-                );
-            }
-        }
-
-        private Boolean hasRelatedNodes(Map<String, Object> row){
-            return row.get("related_node.uri") != null;
+            GraphElementSearchResult graphElementSearchResult = searchResultBuilder.build();
+            searchResults.add(
+                    (ResultType) graphElementSearchResult
+            );
         }
 
         private SearchResultBuilder getFromRow(Map<String, Object> row) {
@@ -208,7 +188,13 @@ public class Neo4jGraphSearch implements GraphSearch {
         private void printRow(Map<String, Object> row) {
             System.out.println("*************printing row*****************");
             for (String key : row.keySet()) {
-                System.out.println(key + " " + row.get(key));
+                if (key.equals("related_nodes")) {
+                    List collection = (List) row.get(key);
+                    System.out.println(collection);
+
+                }else{
+                    System.out.println(key + " " + row.get(key));
+                }
             }
         }
 
@@ -249,14 +235,14 @@ public class Neo4jGraphSearch implements GraphSearch {
                     "OPTIONAL MATCH node<-[relation]->related_node " +
                     "RETURN " +
                     "node.uri, node.label, node.creation_date, node.last_modification_date, " +
-                    "related_node.label, related_node.uri, " +
-                    "type(relation) as relation, " +
+                        "COLLECT([related_node.label, related_node.uri, type(relation)])[0..5] as related_nodes, " +
                     "labels(node) as type limit 10";
         }
+
         private String formatSearchTerm(String searchTerm) {
             return QueryParser.escape(searchTerm).replace(
                     "\\", "\\\\"
-            ).replace("'","\\'").replace(" ", " AND ");
+            ).replace("'", "\\'").replace(" ", " AND ");
         }
     }
 }

@@ -594,6 +594,45 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
+    public void there_is_a_limit_5_related_elements(){
+        SchemaOperator schema = createSchema(userGraph.user());
+        schema.label("schema1");
+        for(int i = 1; i <= 12; i++){
+            schema.addProperty();
+        }
+        VertexSearchResult searchResult = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+                "schema",
+                user
+        ).iterator().next();
+        assertThat(
+                searchResult.getProperties().size(),
+                is(5)
+        );
+    }
+
+    @Test
+    public void results_limit_is_on_number_of_results_not_number_of_related_elements(){
+        SchemaOperator schema = createSchema(userGraph.user());
+        schema.label("schema1");
+        for(int i = 1; i <= 12; i++){
+            schema.addProperty();
+        }
+        SchemaOperator schema2 = createSchema(userGraph.user());
+        schema2.label("schema2");
+        for(int i = 1; i <= 12; i++){
+            schema2.addProperty();
+        }
+        List<VertexSearchResult> searchResult = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+                "schema",
+                user
+        );
+        assertThat(
+                searchResult.size(),
+                is(2)
+        );
+    }
+
+    @Test
     public void has_number_of_references_to_an_identification() {
 
     }

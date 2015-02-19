@@ -7,11 +7,11 @@ package org.triple_brain.module.neo4j_search.result_builder;
 import org.triple_brain.module.model.graph.edge.EdgePojo;
 import org.triple_brain.module.model.graph.vertex.VertexInSubGraphPojo;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Relationships;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
 import org.triple_brain.module.search.EdgeSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResult;
 
+import java.util.List;
 import java.util.Map;
 
 public class RelationSearchResultBuilder implements SearchResultBuilder {
@@ -24,27 +24,11 @@ public class RelationSearchResultBuilder implements SearchResultBuilder {
         this.prefix = prefix;
     }
 
-    @Override
-    public GraphElementSearchResult update(GraphElementSearchResult graphElementSearchResult) {
-        EdgeSearchResult searchResult = (EdgeSearchResult) graphElementSearchResult;
-        VertexInSubGraphPojo vertex = new VertexInSubGraphPojo(
-                FriendlyResourceFromExtractorQueryRow.usingRowAndNodeKey(
-                        row,
-                        "related_node"
-                ).build()
-        );
-        EdgePojo edge = searchResult.getEdge();
-        if(isDestinationVertex()){
-            edge.setDestinationVertex(vertex);
-        }else{
-            edge.setSourceVertex(vertex);
-        }
-        return searchResult;
-    }
+
 
     @Override
     public GraphElementSearchResult build() {
-        return new EdgeSearchResult(
+        EdgeSearchResult searchResult = new EdgeSearchResult(
                 new EdgePojo(
                         GraphElementFromExtractorQueryRow.usingRowAndKey(
                                 row,
@@ -52,15 +36,27 @@ public class RelationSearchResultBuilder implements SearchResultBuilder {
                         ).build()
                 )
         );
-    }
-
-    private Boolean isDestinationVertex(){
-        return Relationships.DESTINATION_VERTEX.name().equals(
-                getRelationName()
+        List<List<String>> propertiesList = RelatedFriendlyResourceExtractor.getListOfPropertiesFromRow(
+                row
         );
+        for(List<String> properties : propertiesList){
+            RelatedFriendlyResourceExtractor friendlyResourceExtractor = RelatedFriendlyResourceExtractor.fromResourceProperties(
+                    properties
+            );
+            VertexInSubGraphPojo vertex = new VertexInSubGraphPojo(
+                    friendlyResourceExtractor.get()
+            );
+            EdgePojo edge = searchResult.getEdge();
+            if(isDestinationVertex(friendlyResourceExtractor.getRelationship())){
+                edge.setDestinationVertex(vertex);
+            }else{
+                edge.setSourceVertex(vertex);
+            }
+        }
+        return searchResult;
     }
 
-    private String getRelationName(){
-        return row.get("relation").toString();
+    private Boolean isDestinationVertex(Relationships relationShip){
+        return Relationships.DESTINATION_VERTEX == relationShip;
     }
 }

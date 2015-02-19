@@ -5,7 +5,6 @@
 package org.triple_brain.module.neo4j_search.result_builder;
 
 import org.triple_brain.module.model.graph.schema.SchemaPojo;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.PropertySearchResult;
@@ -23,16 +22,13 @@ public class PropertySearchResultBuilder implements SearchResultBuilder {
     }
 
     @Override
-    public GraphElementSearchResult update(GraphElementSearchResult graphElementSearchResult) {
-        return graphElementSearchResult;
-    }
-
-    @Override
     public GraphElementSearchResult build() {
         return PropertySearchResult.forPropertyAndSchema(
                 GraphElementFromExtractorQueryRow.usingRowAndKey(row, prefix).build(),
                 new SchemaPojo(
-                        FriendlyResourceFromExtractorQueryRow.usingRowAndNodeKey(row, "related_node").build()
+                        RelatedFriendlyResourceExtractor.fromResourceProperties(
+                                RelatedFriendlyResourceExtractor.getListOfPropertiesFromRow(row).get(0)
+                        ).get()
                 )
         );
     }
