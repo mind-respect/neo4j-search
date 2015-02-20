@@ -16,8 +16,8 @@ import org.triple_brain.module.model.graph.GraphElementType;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceQueryBuilder;
+import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.IdentificationQueryBuilder;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.Neo4jSubGraphExtractor;
 import org.triple_brain.module.neo4j_search.result_builder.*;
@@ -25,7 +25,6 @@ import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResultPojo;
 import org.triple_brain.module.search.GraphSearch;
 import org.triple_brain.module.search.VertexSearchResult;
-import scala.collection.convert.Wrappers;
 
 import javax.inject.Inject;
 import java.net.URI;
@@ -94,7 +93,7 @@ public class Neo4jGraphSearch implements GraphSearch {
 
     @Override
     public GraphElementSearchResult getDetails(URI uri, User user) {
-        return new Getter<GraphElementSearchResult>().getForUri(
+        return new Getter().getForUri(
                 uri,
                 user.username()
         );
@@ -107,8 +106,9 @@ public class Neo4jGraphSearch implements GraphSearch {
         public GraphElementSearchResult getForUri(URI uri, String username) {
             String query = "START node=node:node_auto_index('uri:" + uri + " AND " +
                     "owner:" + username + "') " +
-                    "RETURN " +                    FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
-                    Neo4jSubGraphExtractor.edgeSpecificPropertiesQueryPartUsingPrefix("node") +
+                    "RETURN " + FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
+                    FriendlyResourceQueryBuilder.imageReturnQueryPart("node") +
+                    IdentificationQueryBuilder.identificationReturnQueryPart("node") +
                     "labels(node) as type";
 
             QueryResult<Map<String, Object>> rows = queryEngine.query(
@@ -118,6 +118,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                     )
             );
             Map<String, Object> row = rows.iterator().next();
+//            printRow(row);
             return new GraphElementSearchResultPojo(
                     GraphElementFromExtractorQueryRow.usingRowAndKey(
                             row,
@@ -192,7 +193,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                     List collection = (List) row.get(key);
                     System.out.println(collection);
 
-                }else{
+                } else {
                     System.out.println(key + " " + row.get(key));
                 }
             }
@@ -201,24 +202,6 @@ public class Neo4jGraphSearch implements GraphSearch {
         private String nodeTypeInRow(Map<String, Object> row) {
             String resultType = row.get("type").toString();
             return resultType.substring(1, resultType.length() - 1);
-        }
-
-
-        private Boolean isForUpdate(Map<String, Object> row) {
-            return !searchResults.isEmpty() && getUriInRow(row).equals(
-                    getLastAddedResult().getGraphElement().uri()
-            );
-        }
-
-        private ResultType getLastAddedResult() {
-            return searchResults.get(searchResults.size() - 1);
-        }
-
-        private URI getUriInRow(Map<String, Object> row) {
-            return FriendlyResourceFromExtractorQueryRow.usingRowAndPrefix(
-                    row,
-                    "node"
-            ).getUri();
         }
 
         private String buildQuery(
@@ -235,7 +218,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                     "OPTIONAL MATCH node<-[relation]->related_node " +
                     "RETURN " +
                     "node.uri, node.label, node.creation_date, node.last_modification_date, " +
-                        "COLLECT([related_node.label, related_node.uri, type(relation)])[0..5] as related_nodes, " +
+                    "COLLECT([related_node.label, related_node.uri, type(relation)])[0..5] as related_nodes, " +
                     "labels(node) as type limit 10";
         }
 

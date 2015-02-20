@@ -4,7 +4,9 @@
 
 package org.triple_brain.module.neo4j_search;
 
+import com.google.common.collect.Sets;
 import org.junit.Test;
+import org.triple_brain.module.model.Image;
 import org.triple_brain.module.model.graph.GraphElement;
 import org.triple_brain.module.model.graph.GraphElementOperator;
 import org.triple_brain.module.model.graph.GraphElementPojo;
@@ -19,10 +21,10 @@ import org.triple_brain.module.search.VertexSearchResult;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
-
 public class GraphSearchTest extends Neo4jSearchRelatedTest {
 
     @Test
@@ -560,6 +562,56 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         assertThat(
                 searchResult.getGraphElement().comment(),
                 is("A description")
+        );
+    }
+
+    @Test
+    public void more_details_contains_image(){
+        GraphElementSearchResult searchResult = graphSearch.getDetails(
+                vertexA.uri(),
+                user
+        );
+        assertThat(
+                searchResult.getGraphElement().images().size(),
+                is(0)
+        );
+        Image image1 = Image.withBase64ForSmallAndUriForBigger(
+                UUID.randomUUID().toString(),
+                URI.create("/large_1")
+        );
+        vertexA.addImages(Sets.newHashSet(
+                image1
+        ));
+        searchResult = graphSearch.getDetails(
+                vertexA.uri(),
+                user
+        );
+        assertThat(
+                searchResult.getGraphElement().images().size(),
+                is(1)
+        );
+    }
+
+    @Test
+    public void more_details_contains_identifications(){
+        GraphElementSearchResult searchResult = graphSearch.getDetails(
+                vertexA.uri(),
+                user
+        );
+        assertThat(
+                searchResult.getGraphElement().getIdentifications().size(),
+                is(0)
+        );
+        vertexA.addGenericIdentification(
+                modelTestScenarios.computerScientistType()
+        );
+        searchResult = graphSearch.getDetails(
+                vertexA.uri(),
+                user
+        );
+        assertThat(
+                searchResult.getGraphElement().getIdentifications().size(),
+                is(1)
         );
     }
 
