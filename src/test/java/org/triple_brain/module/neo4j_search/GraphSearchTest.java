@@ -10,6 +10,7 @@ import org.triple_brain.module.model.Image;
 import org.triple_brain.module.model.graph.GraphElement;
 import org.triple_brain.module.model.graph.GraphElementOperator;
 import org.triple_brain.module.model.graph.GraphElementPojo;
+import org.triple_brain.module.model.graph.IdentificationPojo;
 import org.triple_brain.module.model.graph.edge.Edge;
 import org.triple_brain.module.model.graph.schema.SchemaOperator;
 import org.triple_brain.module.model.graph.vertex.Vertex;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
+
 public class GraphSearchTest extends Neo4jSearchRelatedTest {
 
     @Test
@@ -354,7 +356,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
-    public void schema_label_and_uri_are_included_in_property_search_result(){
+    public void schema_label_and_uri_are_included_in_property_search_result() {
         SchemaOperator schema = createSchema(userGraph.user());
         schema.label("schema1");
         GraphElementOperator property1 = schema.addProperty();
@@ -541,7 +543,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         SchemaOperator schema = createSchema(userGraph.user());
         GraphElementOperator property1 = schema.addProperty();
         property1.label("prop1");
-        GraphElementSearchResult  searchResult = graphSearch.getDetails(
+        GraphElementSearchResult searchResult = graphSearch.getDetails(
                 property1.uri(),
                 userGraph.user()
         );
@@ -555,7 +557,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     public void more_details_contains_comment() {
         vertexA.comment("A description");
         indexGraph();
-        GraphElementSearchResult searchResult= graphSearch.getDetails(
+        GraphElementSearchResult searchResult = graphSearch.getDetails(
                 vertexA.uri(),
                 user
         );
@@ -566,7 +568,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
-    public void more_details_contains_image(){
+    public void more_details_contains_image() {
         GraphElementSearchResult searchResult = graphSearch.getDetails(
                 vertexA.uri(),
                 user
@@ -593,43 +595,61 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
-    public void more_details_contains_identifications(){
+    public void more_details_contains_identification_image_if_has_none() {
+
+        IdentificationPojo identification = modelTestScenarios.computerScientistType();
+        String identificationImage = UUID.randomUUID().toString();
+        identification.setImages(Sets.newHashSet(
+                Image.withBase64ForSmallAndUriForBigger(
+                        identificationImage,
+                        URI.create("/large_1")
+                )
+        ));
+        vertexA.addGenericIdentification(
+                identification
+        );
         GraphElementSearchResult searchResult = graphSearch.getDetails(
                 vertexA.uri(),
                 user
         );
+        Image image = searchResult.getGraphElement().images().iterator().next();
         assertThat(
-                searchResult.getGraphElement().getIdentifications().size(),
-                is(0)
+                image.base64ForSmall(),
+                is(identificationImage)
         );
-        vertexA.addGenericIdentification(
-                modelTestScenarios.computerScientistType()
-        );
+        String vertexImage = UUID.randomUUID().toString();
+        vertexA.addImages(Sets.newHashSet(
+                Image.withBase64ForSmallAndUriForBigger(
+                        vertexImage,
+                        URI.create("/large_1")
+                )
+        ));
         searchResult = graphSearch.getDetails(
                 vertexA.uri(),
                 user
         );
+        image = searchResult.getGraphElement().images().iterator().next();
         assertThat(
-                searchResult.getGraphElement().getIdentifications().size(),
-                is(1)
+                image.base64ForSmall(),
+                is(vertexImage)
         );
     }
 
     @Test
     public void cannot_get_by_uri_if_not_owner_element_not_public() {
-        try{
+        try {
             graphSearch.getDetails(
                     vertexA.uri(),
                     user2
             );
             fail();
-        }catch(Exception e){
+        } catch (Exception e) {
 
         }
     }
 
     @Test
-    public void vertices_have_their_edges_label_and_uri_in_result(){
+    public void vertices_have_their_edges_label_and_uri_in_result() {
         VertexSearchResult searchResult = graphSearch.searchOnlyForOwnVerticesForAutoCompletionByLabel(
                 vertexA.label(),
                 user
@@ -646,10 +666,10 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
-    public void there_is_a_limit_5_related_elements(){
+    public void there_is_a_limit_5_related_elements() {
         SchemaOperator schema = createSchema(userGraph.user());
         schema.label("schema1");
-        for(int i = 1; i <= 12; i++){
+        for (int i = 1; i <= 12; i++) {
             schema.addProperty();
         }
         VertexSearchResult searchResult = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
@@ -663,15 +683,15 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
-    public void results_limit_is_on_number_of_results_not_number_of_related_elements(){
+    public void results_limit_is_on_number_of_results_not_number_of_related_elements() {
         SchemaOperator schema = createSchema(userGraph.user());
         schema.label("schema1");
-        for(int i = 1; i <= 12; i++){
+        for (int i = 1; i <= 12; i++) {
             schema.addProperty();
         }
         SchemaOperator schema2 = createSchema(userGraph.user());
         schema2.label("schema2");
-        for(int i = 1; i <= 12; i++){
+        for (int i = 1; i <= 12; i++) {
             schema2.addProperty();
         }
         List<VertexSearchResult> searchResult = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(

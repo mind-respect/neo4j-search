@@ -12,7 +12,10 @@ import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.rest.graphdb.query.QueryEngine;
 import org.neo4j.rest.graphdb.util.QueryResult;
 import org.triple_brain.module.model.User;
+import org.triple_brain.module.model.graph.GraphElement;
+import org.triple_brain.module.model.graph.GraphElementPojo;
 import org.triple_brain.module.model.graph.GraphElementType;
+import org.triple_brain.module.model.graph.IdentificationPojo;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
@@ -120,14 +123,35 @@ public class Neo4jGraphSearch implements GraphSearch {
             Map<String, Object> row = rows.iterator().next();
 //            printRow(row);
             return new GraphElementSearchResultPojo(
-                    GraphElementFromExtractorQueryRow.usingRowAndKey(
-                            row,
-                            "node"
-                    ).build(),
+                    setupGraphElementForDetailedResult(
+                            GraphElementFromExtractorQueryRow.usingRowAndKey(
+                                    row,
+                                    "node"
+                            ).build()
+                    ),
                     GraphElementType.valueOf(
                             nodeTypeInRow(row)
                     )
             );
+        }
+
+
+        private GraphElementPojo setupGraphElementForDetailedResult(GraphElementPojo graphElement) {
+            if (graphElement.gotImages()) {
+                graphElement.removeAllIdentifications();
+                return graphElement;
+            }
+            for (IdentificationPojo identification : graphElement.getIdentifications().values()) {
+                if (identification.gotImages()) {
+                    graphElement.images().add(
+                            identification.images().iterator().next()
+                    );
+                    graphElement.removeAllIdentifications();
+                    return graphElement;
+                }
+            }
+            graphElement.removeAllIdentifications();
+            return graphElement;
         }
 
         public List<ResultType> get(
