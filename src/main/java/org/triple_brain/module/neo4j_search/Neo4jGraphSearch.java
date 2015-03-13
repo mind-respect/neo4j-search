@@ -112,7 +112,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                     "RETURN " + FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
                     FriendlyResourceQueryBuilder.imageReturnQueryPart("node") +
                     IdentificationQueryBuilder.identificationReturnQueryPart("node") +
-                    "labels(node) as type";
+                    "node.type as type";
 
             QueryResult<Map<String, Object>> rows = queryEngine.query(
                     query,
@@ -224,8 +224,7 @@ public class Neo4jGraphSearch implements GraphSearch {
         }
 
         private String nodeTypeInRow(Map<String, Object> row) {
-            String resultType = row.get("type").toString();
-            return resultType.substring(1, resultType.length() - 1);
+            return row.get("type").toString();
         }
 
         private String buildQuery(
@@ -243,7 +242,7 @@ public class Neo4jGraphSearch implements GraphSearch {
                     "RETURN " +
                     "node.uri, node.label, node.creation_date, node.last_modification_date, " +
                     "COLLECT([related_node.label, related_node.uri, type(relation)])[0..5] as related_nodes, " +
-                    "labels(node) as type limit 10";
+                    "node.type as type limit 10";
         }
 
         private String formatSearchTerm(String searchTerm) {
