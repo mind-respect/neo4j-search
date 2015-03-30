@@ -635,16 +635,12 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
-    public void cannot_get_by_uri_if_not_owner_element_not_public() {
-        try {
-            graphSearch.getDetails(
-                    vertexA.uri(),
-                    user2
-            );
-            fail();
-        } catch (Exception e) {
-
-        }
+    public void cannot_get_by_uri_if_not_owner_of_non_public_element() {
+        GraphElementSearchResult result = graphSearch.getDetails(
+                vertexA.uri(),
+                user2
+        );
+        assertNull(result);
     }
 
     @Test
@@ -721,6 +717,29 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
                 results.size(),
                 is(1)
         );
+    }
+
+    @Test
+    public void can_get_search_details_of_public_resource_as_anonymous_user() {
+        vertexB.comment("some comment");
+        vertexB.makePublic();
+        GraphElementSearchResult searchResult = graphSearch.getDetailsAnonymously(
+                vertexB.uri()
+        );
+        assertThat(
+                searchResult.getGraphElement().comment(),
+                is("some comment")
+        );
+    }
+
+    @Test
+    public void cannot_get_search_details_of_private_resource_as_anonymous_user() {
+        vertexB.comment("some comment");
+        vertexB.makePrivate();
+        GraphElementSearchResult searchResult = graphSearch.getDetailsAnonymously(
+                vertexB.uri()
+        );
+        assertNull(searchResult);
     }
 
     @Test

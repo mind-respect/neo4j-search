@@ -12,7 +12,6 @@ import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.rest.graphdb.query.QueryEngine;
 import org.neo4j.rest.graphdb.util.QueryResult;
 import org.triple_brain.module.model.User;
-import org.triple_brain.module.model.graph.GraphElement;
 import org.triple_brain.module.model.graph.GraphElementPojo;
 import org.triple_brain.module.model.graph.GraphElementType;
 import org.triple_brain.module.model.graph.IdentificationPojo;
@@ -22,7 +21,6 @@ import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphEle
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceQueryBuilder;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.IdentificationQueryBuilder;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.Neo4jSubGraphExtractor;
 import org.triple_brain.module.neo4j_search.result_builder.*;
 import org.triple_brain.module.search.GraphElementSearchResult;
 import org.triple_brain.module.search.GraphElementSearchResultPojo;
@@ -113,13 +111,23 @@ public class Neo4jGraphSearch implements GraphSearch {
         );
     }
 
+    @Override
+    public GraphElementSearchResult getDetailsAnonymously(URI uri) {
+        return new Getter().getForUri(
+                uri,
+                ""
+        );
+    }
+
     private class Getter<ResultType extends GraphElementSearchResult> {
         private final String nodePrefix = "node";
         private List<ResultType> searchResults = new ArrayList<>();
 
         public GraphElementSearchResult getForUri(URI uri, String username) {
             String query = "START node=node:node_auto_index('uri:" + uri + " AND " +
-                    "owner:" + username + "') " +
+                    "(is_public:true " +
+                    (StringUtils.isEmpty(username) ? "" : " OR owner:" + username ) + ")" +
+                    "') " +
                     "RETURN " + FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
                     FriendlyResourceQueryBuilder.imageReturnQueryPart("node") +
                     IdentificationQueryBuilder.identificationReturnQueryPart("node") +
@@ -131,6 +139,9 @@ public class Neo4jGraphSearch implements GraphSearch {
                             "owner", username
                     )
             );
+            if(!rows.iterator().hasNext()){
+                return null;
+            }
             Map<String, Object> row = rows.iterator().next();
 //            printRow(row);
             return new GraphElementSearchResultPojo(
