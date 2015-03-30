@@ -596,7 +596,6 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
 
     @Test
     public void more_details_contains_identification_image_if_has_none() {
-
         IdentificationPojo identification = modelTestScenarios.computerScientistType();
         String identificationImage = UUID.randomUUID().toString();
         identification.setImages(Sets.newHashSet(
@@ -705,9 +704,28 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
     }
 
     @Test
+    public void can_search_public_vertices_as_anonymous_user() {
+        List<VertexSearchResult> results = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
+                "vert",
+                user
+        );
+        assertThat(
+                results.size(),
+                is(3)
+        );
+        vertexB.makePublic();
+        results = graphSearch.searchPublicVerticesOnly(
+                "vert"
+        );
+        assertThat(
+                results.size(),
+                is(1)
+        );
+    }
+
+    @Test
     public void has_number_of_references_to_an_identification() {
 
     }
-
 
 }

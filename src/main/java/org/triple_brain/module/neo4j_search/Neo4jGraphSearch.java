@@ -102,6 +102,17 @@ public class Neo4jGraphSearch implements GraphSearch {
         );
     }
 
+    @Override
+    public List<VertexSearchResult> searchPublicVerticesOnly(String searchTerm) {
+        return new Getter<VertexSearchResult>().get(
+                searchTerm,
+                false,
+                "",
+                GraphElementType.vertex,
+                GraphElementType.schema
+        );
+    }
+
     private class Getter<ResultType extends GraphElementSearchResult> {
         private final String nodePrefix = "node";
         private List<ResultType> searchResults = new ArrayList<>();
@@ -235,7 +246,8 @@ public class Neo4jGraphSearch implements GraphSearch {
         ) {
             return "START node=node:node_auto_index('" +
                     Neo4jFriendlyResource.props.label + ":(" + formatSearchTerm(searchTerm) + "*) AND " +
-                    (forPersonal ? "owner:" + username : "(is_public:true OR owner:" + username + ")") + " AND " +
+                    (forPersonal ? "owner:" + username : "(is_public:true " +
+                            (StringUtils.isEmpty(username) ? "" : " OR owner:" + username ) + ")") + " AND " +
                     "( " + Neo4jFriendlyResource.props.type + ":" + StringUtils.join(graphElementTypes, " OR type:") + ") " +
                     "') " +
                     "OPTIONAL MATCH node<-[relation]->related_node " +
