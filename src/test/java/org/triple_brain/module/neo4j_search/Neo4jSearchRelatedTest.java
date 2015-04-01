@@ -45,15 +45,11 @@ public class Neo4jSearchRelatedTest extends AdaptableGraphComponentTest{
     public void beforeSearchRelatedTest() throws Exception{
         graphSearch = AdaptableGraphComponentTest.injector.getInstance(Neo4jGraphSearch.class);
         graphIndexer = AdaptableGraphComponentTest.injector.getInstance(Neo4jGraphIndexer.class);
-        user = User.withUsernameEmailAndLocales(
-                "test2",
-                "test@2example.org",
-                "[fr]"
+        user = User.withEmail(
+                "test@2example.org"
         );
-        user2 = User.withUsernameEmailAndLocales(
-                "test",
-                "test@example.org",
-                "[fr]"
+        user2 = User.withEmail(
+                "test@example.org"
         );
         deleteAllDocs();
         makeGraphHave3SerialVerticesWithLongLabels();
