@@ -47,10 +47,10 @@ public class Neo4jSearchRelatedTest extends AdaptableGraphComponentTest{
         graphIndexer = AdaptableGraphComponentTest.injector.getInstance(Neo4jGraphIndexer.class);
         user = User.withEmail(
                 "test@2example.org"
-        );
+        ).setUsername("test2");
         user2 = User.withEmail(
                 "test@example.org"
-        );
+        ).setUsername("test");
         deleteAllDocs();
         makeGraphHave3SerialVerticesWithLongLabels();
         vertexOfUser2 = graphMaker.createForUser(user2).defaultVertex();
