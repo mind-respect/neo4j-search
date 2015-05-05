@@ -5,18 +5,19 @@
 package org.triple_brain.module.neo4j_search.result_builder;
 
 import org.triple_brain.module.model.graph.FriendlyResourcePojo;
+import org.triple_brain.module.model.graph.GraphElementPojo;
 import org.triple_brain.module.neo4j_graph_manipulator.graph.Relationships;
 
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
-public class RelatedFriendlyResourceExtractor {
+public class RelatedGraphElementExtractor {
 
     List<String> properties;
 
-    public static RelatedFriendlyResourceExtractor fromResourceProperties(List<String> properties) {
-        return new RelatedFriendlyResourceExtractor(
+    public static RelatedGraphElementExtractor fromResourceProperties(List<String> properties) {
+        return new RelatedGraphElementExtractor(
                 properties
         );
     }
@@ -25,21 +26,21 @@ public class RelatedFriendlyResourceExtractor {
         return (List) row.get("related_nodes");
     }
 
-    protected RelatedFriendlyResourceExtractor(List<String> properties) {
+    protected RelatedGraphElementExtractor(List<String> properties) {
         this.properties = properties;
     }
 
-    public FriendlyResourcePojo get() {
+    public GraphElementPojo get() {
         String label = properties.get(0);
         if (label == null) {
             label = "";
         }
-        return new FriendlyResourcePojo(
+        return new GraphElementPojo(new FriendlyResourcePojo(
                 URI.create(
                         properties.get(1)
                 ),
                 label
-        );
+        ));
     }
 
     public Boolean hasResource(){

@@ -26,8 +26,8 @@ public class PropertySearchResultBuilder implements SearchResultBuilder {
         return PropertySearchResult.forPropertyAndSchema(
                 GraphElementFromExtractorQueryRow.usingRowAndKey(row, prefix).build(),
                 new SchemaPojo(
-                        RelatedFriendlyResourceExtractor.fromResourceProperties(
-                                RelatedFriendlyResourceExtractor.getListOfPropertiesFromRow(row).get(0)
+                        RelatedGraphElementExtractor.fromResourceProperties(
+                                RelatedGraphElementExtractor.getListOfPropertiesFromRow(row).get(0)
                         ).get()
                 )
         );

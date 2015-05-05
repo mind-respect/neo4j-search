@@ -40,12 +40,12 @@ public class VertexSearchResultBuilder implements SearchResultBuilder {
     }
 
     public static Map<URI, GraphElementPojo> buildPropertiesFromRow(Map<String, Object> row) {
-        List<List<String>> propertiesList = RelatedFriendlyResourceExtractor.getListOfPropertiesFromRow(
+        List<List<String>> propertiesList = RelatedGraphElementExtractor.getListOfPropertiesFromRow(
                 row
         );
         Map<URI, GraphElementPojo> properties = new HashMap<>();
         for (List<String> propertiesString : propertiesList) {
-            RelatedFriendlyResourceExtractor friendlyResourceExtractor = RelatedFriendlyResourceExtractor.fromResourceProperties(
+            RelatedGraphElementExtractor friendlyResourceExtractor = RelatedGraphElementExtractor.fromResourceProperties(
                     propertiesString
             );
             if (friendlyResourceExtractor.hasResource()) {
@@ -59,10 +59,8 @@ public class VertexSearchResultBuilder implements SearchResultBuilder {
         return properties;
     }
 
-    private static void addProperty(RelatedFriendlyResourceExtractor friendlyResourceExtractor, Map<URI, GraphElementPojo> properties) {
-        GraphElementPojo property = new GraphElementPojo(
-                friendlyResourceExtractor.get()
-        );
+    private static void addProperty(RelatedGraphElementExtractor graphElementExtractor, Map<URI, GraphElementPojo> properties) {
+        GraphElementPojo property = graphElementExtractor.get();
         properties.put(
                 property.uri(),
                 property

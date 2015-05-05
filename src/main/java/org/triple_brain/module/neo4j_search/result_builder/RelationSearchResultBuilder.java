@@ -36,11 +36,11 @@ public class RelationSearchResultBuilder implements SearchResultBuilder {
                         ).build()
                 )
         );
-        List<List<String>> propertiesList = RelatedFriendlyResourceExtractor.getListOfPropertiesFromRow(
+        List<List<String>> propertiesList = RelatedGraphElementExtractor.getListOfPropertiesFromRow(
                 row
         );
         for(List<String> properties : propertiesList){
-            RelatedFriendlyResourceExtractor friendlyResourceExtractor = RelatedFriendlyResourceExtractor.fromResourceProperties(
+            RelatedGraphElementExtractor friendlyResourceExtractor = RelatedGraphElementExtractor.fromResourceProperties(
                     properties
             );
             VertexInSubGraphPojo vertex = new VertexInSubGraphPojo(
