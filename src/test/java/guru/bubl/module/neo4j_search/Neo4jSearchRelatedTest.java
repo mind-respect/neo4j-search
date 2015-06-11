@@ -2,19 +2,19 @@
  * Copyright Vincent Blouin under the GPL License version 3
  */
 
-package org.triple_brain.module.neo4j_search;
+package guru.bubl.module.neo4j_search;
 
 import org.junit.Before;
-import org.triple_brain.module.model.User;
-import org.triple_brain.module.model.graph.AdaptableGraphComponentTest;
-import org.triple_brain.module.model.graph.GraphFactory;
-import org.triple_brain.module.model.graph.schema.SchemaOperator;
-import org.triple_brain.module.model.graph.vertex.Vertex;
-import org.triple_brain.module.model.graph.vertex.VertexOperator;
-import org.triple_brain.module.model.test.scenarios.TestScenarios;
-import org.triple_brain.module.model.test.scenarios.VerticesCalledABAndC;
-import org.triple_brain.module.search.GraphIndexer;
-import org.triple_brain.module.search.GraphSearch;
+import guru.bubl.module.model.User;
+import guru.bubl.module.model.graph.AdaptableGraphComponentTest;
+import guru.bubl.module.model.graph.GraphFactory;
+import guru.bubl.module.model.graph.schema.SchemaOperator;
+import guru.bubl.module.model.graph.vertex.Vertex;
+import guru.bubl.module.model.graph.vertex.VertexOperator;
+import guru.bubl.module.model.test.scenarios.TestScenarios;
+import guru.bubl.module.model.test.scenarios.VerticesCalledABAndC;
+import guru.bubl.module.search.GraphIndexer;
+import guru.bubl.module.search.GraphSearch;
 
 import javax.inject.Inject;
 

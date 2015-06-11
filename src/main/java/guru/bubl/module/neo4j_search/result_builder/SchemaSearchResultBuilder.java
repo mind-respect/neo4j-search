@@ -2,12 +2,12 @@
  * Copyright Vincent Blouin under the GPL License version 3
  */
 
-package org.triple_brain.module.neo4j_search.result_builder;
+package guru.bubl.module.neo4j_search.result_builder;
 
-import org.triple_brain.module.model.graph.GraphElementType;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
-import org.triple_brain.module.search.GraphElementSearchResult;
-import org.triple_brain.module.search.VertexSearchResult;
+import guru.bubl.module.model.graph.GraphElementType;
+import guru.bubl.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
+import guru.bubl.module.search.GraphElementSearchResult;
+import guru.bubl.module.search.VertexSearchResult;
 
 import java.util.Map;
 

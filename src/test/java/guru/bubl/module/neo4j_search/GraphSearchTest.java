@@ -2,22 +2,22 @@
  * Copyright Vincent Blouin under the GPL License version 3
  */
 
-package org.triple_brain.module.neo4j_search;
+package guru.bubl.module.neo4j_search;
 
 import com.google.common.collect.Sets;
 import org.junit.Test;
-import org.triple_brain.module.model.Image;
-import org.triple_brain.module.model.graph.GraphElement;
-import org.triple_brain.module.model.graph.GraphElementOperator;
-import org.triple_brain.module.model.graph.GraphElementPojo;
-import org.triple_brain.module.model.graph.IdentificationPojo;
-import org.triple_brain.module.model.graph.edge.Edge;
-import org.triple_brain.module.model.graph.schema.SchemaOperator;
-import org.triple_brain.module.model.graph.vertex.Vertex;
-import org.triple_brain.module.search.EdgeSearchResult;
-import org.triple_brain.module.search.GraphElementSearchResult;
-import org.triple_brain.module.search.PropertySearchResult;
-import org.triple_brain.module.search.VertexSearchResult;
+import guru.bubl.module.model.Image;
+import guru.bubl.module.model.graph.GraphElement;
+import guru.bubl.module.model.graph.GraphElementOperator;
+import guru.bubl.module.model.graph.GraphElementPojo;
+import guru.bubl.module.model.graph.IdentificationPojo;
+import guru.bubl.module.model.graph.edge.Edge;
+import guru.bubl.module.model.graph.schema.SchemaOperator;
+import guru.bubl.module.model.graph.vertex.Vertex;
+import guru.bubl.module.search.EdgeSearchResult;
+import guru.bubl.module.search.GraphElementSearchResult;
+import guru.bubl.module.search.PropertySearchResult;
+import guru.bubl.module.search.VertexSearchResult;
 
 import java.net.URI;
 import java.util.List;

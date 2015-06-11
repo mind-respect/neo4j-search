@@ -2,8 +2,9 @@
  * Copyright Vincent Blouin under the GPL License version 3
  */
 
-package org.triple_brain.module.neo4j_search;
+package guru.bubl.module.neo4j_search;
 
+import guru.bubl.module.neo4j_search.result_builder.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.queryParser.QueryParser;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -11,21 +12,20 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.index.ReadableIndex;
 import org.neo4j.rest.graphdb.query.QueryEngine;
 import org.neo4j.rest.graphdb.util.QueryResult;
-import org.triple_brain.module.model.User;
-import org.triple_brain.module.model.graph.GraphElementPojo;
-import org.triple_brain.module.model.graph.GraphElementType;
-import org.triple_brain.module.model.graph.IdentificationPojo;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceQueryBuilder;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.IdentificationQueryBuilder;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
-import org.triple_brain.module.neo4j_search.result_builder.*;
-import org.triple_brain.module.search.GraphElementSearchResult;
-import org.triple_brain.module.search.GraphElementSearchResultPojo;
-import org.triple_brain.module.search.GraphSearch;
-import org.triple_brain.module.search.VertexSearchResult;
+import guru.bubl.module.model.User;
+import guru.bubl.module.model.graph.GraphElementPojo;
+import guru.bubl.module.model.graph.GraphElementType;
+import guru.bubl.module.model.graph.IdentificationPojo;
+import guru.bubl.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
+import guru.bubl.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
+import guru.bubl.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
+import guru.bubl.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceQueryBuilder;
+import guru.bubl.module.neo4j_graph_manipulator.graph.graph.extractor.IdentificationQueryBuilder;
+import guru.bubl.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
+import guru.bubl.module.search.GraphElementSearchResult;
+import guru.bubl.module.search.GraphElementSearchResultPojo;
+import guru.bubl.module.search.GraphSearch;
+import guru.bubl.module.search.VertexSearchResult;
 
 import javax.inject.Inject;
 import java.net.URI;

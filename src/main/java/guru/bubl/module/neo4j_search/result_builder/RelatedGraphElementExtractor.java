@@ -2,11 +2,11 @@
  * Copyright Vincent Blouin under the GPL License version 3
  */
 
-package org.triple_brain.module.neo4j_search.result_builder;
+package guru.bubl.module.neo4j_search.result_builder;
 
-import org.triple_brain.module.model.graph.FriendlyResourcePojo;
-import org.triple_brain.module.model.graph.GraphElementPojo;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.Relationships;
+import guru.bubl.module.model.graph.FriendlyResourcePojo;
+import guru.bubl.module.model.graph.GraphElementPojo;
+import guru.bubl.module.neo4j_graph_manipulator.graph.Relationships;
 
 import java.net.URI;
 import java.util.List;

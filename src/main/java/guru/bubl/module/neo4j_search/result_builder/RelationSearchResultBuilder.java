@@ -2,14 +2,14 @@
  * Copyright Vincent Blouin under the GPL License version 3
  */
 
-package org.triple_brain.module.neo4j_search.result_builder;
+package guru.bubl.module.neo4j_search.result_builder;
 
-import org.triple_brain.module.model.graph.edge.EdgePojo;
-import org.triple_brain.module.model.graph.vertex.VertexInSubGraphPojo;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.Relationships;
-import org.triple_brain.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
-import org.triple_brain.module.search.EdgeSearchResult;
-import org.triple_brain.module.search.GraphElementSearchResult;
+import guru.bubl.module.model.graph.edge.EdgePojo;
+import guru.bubl.module.model.graph.vertex.VertexInSubGraphPojo;
+import guru.bubl.module.neo4j_graph_manipulator.graph.Relationships;
+import guru.bubl.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
+import guru.bubl.module.search.EdgeSearchResult;
+import guru.bubl.module.search.GraphElementSearchResult;
 
 import java.util.List;
 import java.util.Map;

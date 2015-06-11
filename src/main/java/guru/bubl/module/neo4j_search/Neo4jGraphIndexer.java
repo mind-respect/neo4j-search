@@ -2,13 +2,13 @@
  * Copyright Vincent Blouin under the GPL License version 3
  */
 
-package org.triple_brain.module.neo4j_search;
+package guru.bubl.module.neo4j_search;
 
-import org.triple_brain.module.model.graph.GraphElement;
-import org.triple_brain.module.model.graph.edge.Edge;
-import org.triple_brain.module.model.graph.schema.SchemaPojo;
-import org.triple_brain.module.model.graph.vertex.VertexOperator;
-import org.triple_brain.module.search.GraphIndexer;
+import guru.bubl.module.model.graph.GraphElement;
+import guru.bubl.module.model.graph.edge.Edge;
+import guru.bubl.module.model.graph.schema.SchemaPojo;
+import guru.bubl.module.model.graph.vertex.VertexOperator;
+import guru.bubl.module.search.GraphIndexer;
 
 public class Neo4jGraphIndexer implements GraphIndexer{
 

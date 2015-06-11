@@ -2,13 +2,13 @@
  * Copyright Vincent Blouin under the GPL License version 3
  */
 
-package org.triple_brain.module.neo4j_search;
+package guru.bubl.module.neo4j_search;
 
 import com.google.inject.AbstractModule;
-import org.triple_brain.module.search.GraphIndexer;
-import org.triple_brain.module.search.GraphSearch;
+import guru.bubl.module.search.GraphIndexer;
+import guru.bubl.module.search.GraphSearch;
 
-public class Neo4jSearchModule extends AbstractModule {
+public class Neo4jGraphSearchModule extends AbstractModule {
 
     @Override
     protected void configure() {
