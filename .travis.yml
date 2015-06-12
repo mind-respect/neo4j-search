@@ -1,1 +1,18 @@
-language: java
+before_install: "git clone https://github.com/VincentBlouin/travis-maven-deploy.git target/travis"
+script: "[ ${TRAVIS_PULL_REQUEST} = 'false' ] && mvn clean deploy --settings target/travis/settings.xml || mvn clean verify --settings target/travis/settings.xml"
+
+# whitelist
+branches:
+  only:
+    - master
+ 
+env:
+  global:
+    - secure: "belwiRInC+VRC5BaZlqB/wNIvEJussXoHWH0IoUBbt1KNR+/ZowRbmYiGCyURJisEOM/NZAHMW0gcuwQhbZ6CMCM8t9EoNweKRl91YEvKxLjIxj8ZCaqSybYd5Dv35c+QsdovCsuICyO+3widQbafOSM9H+pr87/zZth6QiTQJDqq9/OKlbIGkWBAXM0CCRfhZ4+m+aLqotLL2VMmxldNLCfHdyuNMNlEJGJhN38m8myJmaCOnA0G0VeZX1Yk/3bXOybKEsIURpK7sRP+rgQLqNltOgHt8YeN6JGsdVlF+kVMS4/79Rxyu6EqjBko0JPnGeoI0yLnc4USeY1YQFrDh2oxgPMXtQEa0eRmqdeHOkwgSfYR2u+2vpWdI+H5gDNiWjVe/WOYfFayy5jr8jTIRLi6BW23OH8RYLR7Mh9BH0Em6KajAyhOWB/LvuuQs70/vqCtiOHsoLA8HEF4S3J9u9gojjK6GhuMCMkU6yAU1adyx97O+cs1BkrifXKmdUFpDWM2Wp6LwqaPasxbAtD3InWFbPkTq+1FvzrVeB/kCAZJHngV6Qq7ajMga9sqkwTXNevCnQhmWqm+FYC5mVBBeHXk5q9eC/geQlUYVeBMqgZzNZ45L5zwVVTLQ4QaN58LZechut6ALSQnsMfi+jKB2pyWekpkdb4khlNGqR6toI="
+    - secure: "T62iFHtIP/0ffVI08W6IvOVbznkA8SJ/1Lsn5caVm9rUGrDfcyDTTbdAOsZdhtemAUTUIFbLKnL6EXf5NC+d6/fZjAmlPsyF+uQ5zS50f952QL3lfWYrJeqgtjYWdgArVbvEIAAQoi7mcpAnCMDqu+oa140ZGqURRwTr46k1TCUvXjcjERtjjdF/draUlQ4EPkfEdwSG5VxsqejosBkEoheWvr8/h2yiHE7i1aWiEilOk1yHIdEU7WV0ahda3WGE2QNnopzGaftwiCZwJVZBe0UU9g8Nm79RygTCuD7PXc8Ira0rpYEieO2MMWkudCgEZk1NcLtL5DqOWYbS9GG/yIdqRinQYSNuPfLYPJFcwyNe9EnePHf/LPZvo8bixOMOFONEennZTB2vWf6c61Fjzmli3xzS3Ref6F5/MUCz6y7qqOcML63G7Dzp3S5Bd/GWeQHLliqcnTPHsxxq7VH6JBWv8oPf71pzkI1M6qDLFTaveu7n257A0HambmqRYFKZ9qQAfEf6+5XXLE1g/B49mGKkEfExe/dGKOz1w32a0SMZmOYMDaQK8G8cm5CUaE0t2ffHGOIrJGbgz05J6nVgXkoBs+EDGEq7bMyMgZJ1kOt5w+dry8xW3ftxUvmW8nyzIeu9LkGAo81jYnoD5FWl8SMUH4IlVjyYzYbM7+3482c="
+    - secure: "meo3etq0lTb8+aMHBmqh+2DS6ujyMv5ZdTTiLcdb2/8S7AlhhCSTdVdstZavFrksshOpHZTpFAOvYcJxZHmOlUnVC6n/dsz/uptn+7xcj8p+spp/8f2yEK5DrEnTc9RZXztyszIYXHNJKFB58xMYFndLOQBvgumLGPkfK1Lkafs41MFy7HcTTDs5mVa8qu9U5XUhbktxrqtI44KwFKuB/EkdQu5Iu/D2ymJPZQjkLKkMoQJm198FYOQkeZkZPtRV3+eIiysrn5evimHMgodd/kksGRP63g2xyhDVG7c4M1aPMXkPcev6wsxaR5HosBe3rH7KMCsfY7xYw2CI0U3I3hBSFSgHAvKlc8D9gxmUOW1ZAwFkLjbdbakUeHS4UPp05uAqJM9+ojpwtVxowObIVBvS5R6fEKqxS+4LscKUg9qzHLcEj0sld86+kbNSO9Z+UJv+cFlF45f9JEEVG/QrRAq8WKL4gL3peExvWSUMz+RyUG/j2C7hYMrznApzEicGMPKzFBVzTL8hOneTxvv7Qi64P8l3OUgajdSLd+KG6bST0G2RzQClF9RjeDxqEay75BgOZWfLDt2RU91Ea3ACAhLhC6aWx8Oy7G3I4jgWn652UA5cTu4HTvbqkGBe2SPvK6pD0t52Pq9tEZAciYxWyW5+kSsEzkJI8HqyKNdYSfw="
+
+after_success:
+    - git clone https://github.com/VincentBlouin/travis-build-children target/travis-build-children
+    - chmod 755 target/travis-build-children/build_children.sh
+    - target/travis1-build-children/build_children.sh VincentBlouin/bubl.guru_service
