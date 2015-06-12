@@ -15,4 +15,4 @@ env:
 after_success:
     - git clone https://github.com/VincentBlouin/travis-build-children target/travis-build-children
     - chmod 755 target/travis-build-children/build_children.sh
-    - target/travis1-build-children/build_children.sh VincentBlouin/bubl.guru_service
+    - target/travis-build-children/build_children.sh VincentBlouin/bubl.guru_service
