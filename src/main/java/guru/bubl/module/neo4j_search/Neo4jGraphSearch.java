@@ -4,6 +4,7 @@
 
 package guru.bubl.module.neo4j_search;
 
+import guru.bubl.module.neo4j_graph_manipulator.graph.Relationships;
 import guru.bubl.module.neo4j_search.result_builder.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.queryParser.QueryParser;
@@ -128,9 +129,10 @@ public class Neo4jGraphSearch implements GraphSearch {
                     "(is_public:true " +
                     (StringUtils.isEmpty(username) ? "" : " OR owner:" + username ) + ")" +
                     "') " +
+                    "OPTIONAL MATCH (node)-[" + IdentificationQueryBuilder.IDENTIFICATION_RELATION_QUERY_KEY + ":" + Relationships.IDENTIFIED_TO + "]->(" + IdentificationQueryBuilder.IDENTIFICATION_QUERY_KEY + ") " +
                     "RETURN " + FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
                     FriendlyResourceQueryBuilder.imageReturnQueryPart("node") +
-                    IdentificationQueryBuilder.identificationReturnQueryPart("node") +
+                    IdentificationQueryBuilder.identificationReturnQueryPart() +
                     "node.type as type";
 
             QueryResult<Map<String, Object>> rows = queryEngine.query(

@@ -5,12 +5,9 @@
 package guru.bubl.module.neo4j_search;
 
 import com.google.common.collect.Sets;
+import guru.bubl.module.model.graph.*;
 import org.junit.Test;
 import guru.bubl.module.model.Image;
-import guru.bubl.module.model.graph.GraphElement;
-import guru.bubl.module.model.graph.GraphElementOperator;
-import guru.bubl.module.model.graph.GraphElementPojo;
-import guru.bubl.module.model.graph.IdentificationPojo;
 import guru.bubl.module.model.graph.edge.Edge;
 import guru.bubl.module.model.graph.schema.SchemaOperator;
 import guru.bubl.module.model.graph.vertex.Vertex;
@@ -500,7 +497,7 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
 
 
     @Test
-    public void does_no_have_identifications() {
+    public void search_results_dont_have_identifications() {
         indexGraph();
         GraphElement vertex = graphSearch.searchSchemasOwnVerticesAndPublicOnesForAutoCompletionByLabel(
                 vertexA.label(),
@@ -535,6 +532,20 @@ public class GraphSearchTest extends Neo4jSearchRelatedTest {
         assertThat(
                 vertex.label(),
                 is(vertexA.label())
+        );
+    }
+
+    @Test
+    public void elements_with_no_identifications_dont_have_identifications() {
+        vertexB.addGenericIdentification(
+                new ModelTestScenarios().computerScientistType()
+        );
+        GraphElementSearchResult searchResult = graphSearch.getDetails(
+                vertexA.uri(),
+                user
+        );
+        assertTrue(
+                searchResult.getGraphElement().getIdentifications().isEmpty()
         );
     }
 
