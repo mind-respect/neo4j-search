@@ -9,8 +9,9 @@ import guru.bubl.module.model.graph.GraphElementPojo;
 import guru.bubl.module.neo4j_graph_manipulator.graph.Relationships;
 
 import java.net.URI;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 public class RelatedGraphElementExtractor {
 
@@ -22,8 +23,8 @@ public class RelatedGraphElementExtractor {
         );
     }
 
-    public static List<List<String>> getListOfPropertiesFromRow(Map<String, Object> row){
-        return (List) row.get("related_nodes");
+    public static List<List<String>> getListOfPropertiesFromRow(ResultSet row)throws SQLException{
+        return (List) row.getObject("related_nodes");
     }
 
     protected RelatedGraphElementExtractor(List<String> properties) {
