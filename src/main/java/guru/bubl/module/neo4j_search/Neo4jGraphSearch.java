@@ -4,31 +4,27 @@
 
 package guru.bubl.module.neo4j_search;
 
-import guru.bubl.module.common_utils.NamedParameterStatement;
 import guru.bubl.module.common_utils.NoExRun;
-import guru.bubl.module.neo4j_graph_manipulator.graph.Relationships;
-import guru.bubl.module.neo4j_search.result_builder.*;
-import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.queryParser.QueryParser;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.index.ReadableIndex;
-import org.neo4j.rest.graphdb.query.QueryEngine;
-import org.neo4j.rest.graphdb.util.QueryResult;
 import guru.bubl.module.model.User;
 import guru.bubl.module.model.graph.GraphElementPojo;
 import guru.bubl.module.model.graph.GraphElementType;
 import guru.bubl.module.model.graph.IdentificationPojo;
 import guru.bubl.module.neo4j_graph_manipulator.graph.Neo4jFriendlyResource;
-import guru.bubl.module.neo4j_graph_manipulator.graph.Neo4jRestApiUtils;
+import guru.bubl.module.neo4j_graph_manipulator.graph.Relationships;
 import guru.bubl.module.neo4j_graph_manipulator.graph.graph.Neo4jGraphElementFactory;
 import guru.bubl.module.neo4j_graph_manipulator.graph.graph.extractor.FriendlyResourceQueryBuilder;
 import guru.bubl.module.neo4j_graph_manipulator.graph.graph.extractor.IdentificationQueryBuilder;
 import guru.bubl.module.neo4j_graph_manipulator.graph.graph.extractor.subgraph.GraphElementFromExtractorQueryRow;
+import guru.bubl.module.neo4j_search.result_builder.*;
 import guru.bubl.module.search.GraphElementSearchResult;
 import guru.bubl.module.search.GraphElementSearchResultPojo;
 import guru.bubl.module.search.GraphSearch;
 import guru.bubl.module.search.VertexSearchResult;
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.queryParser.QueryParser;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.index.ReadableIndex;
 
 import javax.inject.Inject;
 import java.net.URI;
@@ -40,9 +36,6 @@ import java.util.List;
 import java.util.Map;
 
 public class Neo4jGraphSearch implements GraphSearch {
-
-    @Inject
-    QueryEngine queryEngine;
 
     @Inject
     GraphDatabaseService graphDatabaseService;
@@ -133,15 +126,19 @@ public class Neo4jGraphSearch implements GraphSearch {
         private List<ResultType> searchResults = new ArrayList<>();
 
         public GraphElementSearchResult getForUri(URI uri, String username) {
-            String query = "START node=node:node_auto_index('uri:" + uri + " AND " +
-                    "(is_public:true " +
-                    (StringUtils.isEmpty(username) ? "" : " OR owner:" + username ) + ")" +
-                    "') " +
-                    "OPTIONAL MATCH (node)-[" + IdentificationQueryBuilder.IDENTIFICATION_RELATION_QUERY_KEY + ":" + Relationships.IDENTIFIED_TO + "]->(" + IdentificationQueryBuilder.IDENTIFICATION_QUERY_KEY + ") " +
-                    "RETURN " + FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node") +
-                    FriendlyResourceQueryBuilder.imageReturnQueryPart("node") +
-                    IdentificationQueryBuilder.identificationReturnQueryPart() +
-                    "node.type as type";
+            String query = String.format(
+                    "START node=node:node_auto_index('uri:%s AND (is_public:true %s)') " +
+                            "OPTIONAL MATCH (node)-[%s:%s]->(%s) " +
+                            "RETURN %s%s%snode.type as type",
+                    uri,
+                    StringUtils.isEmpty(username) ? "" : " OR owner:" + username,
+                    IdentificationQueryBuilder.IDENTIFICATION_RELATION_QUERY_KEY,
+                    Relationships.IDENTIFIED_TO,
+                    IdentificationQueryBuilder.IDENTIFICATION_QUERY_KEY,
+                    FriendlyResourceQueryBuilder.returnQueryPartUsingPrefix("node"),
+                    FriendlyResourceQueryBuilder.imageReturnQueryPart("node"),
+                    IdentificationQueryBuilder.identificationReturnQueryPart()
+            );
 
             return NoExRun.wrap(()->{
                 ResultSet rs = connection.createStatement().executeQuery(query);
@@ -170,7 +167,7 @@ public class Neo4jGraphSearch implements GraphSearch {
             }
             for (IdentificationPojo identification : graphElement.getIdentifications().values()) {
                 if (identification.gotImages()) {
-                    graphElement.images().add(
+                    graphElement.addImage(
                             identification.images().iterator().next()
                     );
                     graphElement.removeAllIdentifications();

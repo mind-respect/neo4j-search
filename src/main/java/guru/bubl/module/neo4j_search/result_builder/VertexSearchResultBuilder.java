@@ -33,7 +33,10 @@ public class VertexSearchResultBuilder implements SearchResultBuilder {
     public GraphElementSearchResult build() {
         return NoExRun.wrap(() -> {
             VertexSearchResult searchResult = new VertexSearchResult(
-                    GraphElementFromExtractorQueryRow.usingRowAndKey(row, prefix).build(),
+                    GraphElementFromExtractorQueryRow.usingRowAndKey(
+                            row,
+                            prefix
+                    ).build(),
                     GraphElementType.vertex
             );
             searchResult.getProperties().putAll(
